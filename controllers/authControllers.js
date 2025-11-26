@@ -22,6 +22,7 @@ const authenticateController = expressAsyncHandler(async (req, res) => {
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
     throw error;
   }
 

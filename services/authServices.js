@@ -6,7 +6,7 @@ const authenticate = async (email, phone) => {
   const user = await User.findOne(email ? { email } : { phone });
 
   if (!user) {
-    const verifyExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const verifyExpiresAt = new Date(Date.now() + (2 * 60 + 30) * 1000); // 2 minutes 30 seconds
     await User.create({
       email: email ?? null,
       phone: phone ?? null,

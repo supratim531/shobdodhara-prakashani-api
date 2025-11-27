@@ -22,7 +22,7 @@ import {
 /**
  * @description Fetch the profile of current logged in user
  * @route GET /api/v1/profile/current
- * @access private
+ * @access private (role: USER, ADMIN)
  */
 const fetchCurrentProfileController = expressAsyncHandler(async (req, res) => {
   const user = await fetchCurrentProfile(req.user.id);
@@ -33,7 +33,7 @@ const fetchCurrentProfileController = expressAsyncHandler(async (req, res) => {
 /**
  * @description Update the profile of current logged in user
  * @route PATCH /api/v1/profile/current
- * @access private
+ * @access private (role: USER, ADMIN)
  */
 const updateProfileController = expressAsyncHandler(async (req, res) => {
   const { value, error } = validateUpdateProfilePayload(req.body);
@@ -52,7 +52,7 @@ const updateProfileController = expressAsyncHandler(async (req, res) => {
 /**
  * @description Save a new address for current logged in user
  * @route POST /api/v1/profile/address
- * @access private
+ * @access private (role: USER)
  */
 const saveAddressController = expressAsyncHandler(async (req, res) => {
   const { value, error } = validateSaveAddressPayload(req.body);
@@ -76,7 +76,7 @@ const saveAddressController = expressAsyncHandler(async (req, res) => {
 /**
  * @description Update an existing address for current logged in user
  * @route PATCH /api/v1/profile/address/:addressId
- * @access private
+ * @access private (role: USER)
  */
 const updateAddressController = expressAsyncHandler(async (req, res) => {
   const { value, error } = validateUpdateAddressPayload(req.body);
@@ -105,7 +105,7 @@ const updateAddressController = expressAsyncHandler(async (req, res) => {
 /**
  * @description Delete an address for current logged in user
  * @route DELETE /api/v1/profile/address/:addressId
- * @access private
+ * @access private (role: USER)
  */
 const deleteAddressController = expressAsyncHandler(async (req, res) => {
   const deletedAddress = await deleteAddress(req.user.id, req.params.addressId);
@@ -122,7 +122,7 @@ const deleteAddressController = expressAsyncHandler(async (req, res) => {
 /**
  * @description Set an address as default for current logged in user
  * @route PATCH /api/v1/profile/address/:addressId/default
- * @access private
+ * @access private (role: USER)
  */
 const updateDefaultAddressController = expressAsyncHandler(async (req, res) => {
   const updatedAddress = await updateDefaultAddress(

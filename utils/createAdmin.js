@@ -18,6 +18,7 @@ const createAdmin = async () => {
       admin = await User.create({
         firstName: "Young",
         lastName: "Architects",
+        gender: "MALE",
         email: adminEmail,
         phone: adminPhone,
         password: hashedPassword,

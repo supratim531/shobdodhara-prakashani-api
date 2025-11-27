@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { handleRole } from "../middlewares/roleHandler.js";
 import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
-import { currentProfileController } from "../controllers/profileControllers.js";
+import {
+  currentProfileController,
+  updateProfileController,
+} from "../controllers/profileControllers.js";
 
 const router = Router();
 
@@ -11,6 +14,11 @@ router
     handleValidateToken,
     handleRole("USER", "ADMIN"),
     currentProfileController
+  )
+  .patch(
+    handleValidateToken,
+    handleRole("USER", "ADMIN"),
+    updateProfileController
   );
 
 export default router;

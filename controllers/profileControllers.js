@@ -1,14 +1,22 @@
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
+import {
+  CREATED,
+  NOT_FOUND,
+  UNPROCESSABLE_ENTITY,
+} from "../constants/statusCodes.js";
 import {
   currentProfile,
   updateProfile,
   saveAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
 } from "../services/profileServices.js";
 import {
   validateUpdateProfilePayload,
   validateSaveAddressPayload,
+  validateUpdateAddressPayload,
 } from "../validators/profileValidators.js";
 
 /**
@@ -57,11 +65,89 @@ const saveAddressController = expressAsyncHandler(async (req, res) => {
 
   const address = await saveAddress(req.user.id, value);
 
-  return successResponse(res, "Address saved successfully!", address);
+  return successResponse(
+    res,
+    "Address saved successfully!",
+    address,
+    CREATED.code
+  );
+});
+
+/**
+ * @description Update an existing address for current logged in user
+ * @route PATCH /api/v1/profile/address/:addressId
+ * @access private
+ */
+const updateAddressController = expressAsyncHandler(async (req, res) => {
+  const { value, error } = validateUpdateAddressPayload(req.body);
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  const updatedAddress = await updateAddress(
+    req.user.id,
+    req.params.addressId,
+    value
+  );
+
+  if (!updatedAddress) {
+    res.status(NOT_FOUND.code);
+    res.statusMessage = NOT_FOUND.title;
+    throw new Error("Address not found");
+  }
+
+  return successResponse(res, "Address updated successfully!", updatedAddress);
+});
+
+/**
+ * @description Delete an address for current logged in user
+ * @route DELETE /api/v1/profile/address/:addressId
+ * @access private
+ */
+const deleteAddressController = expressAsyncHandler(async (req, res) => {
+  const deletedAddress = await deleteAddress(req.user.id, req.params.addressId);
+
+  if (!deletedAddress) {
+    res.status(NOT_FOUND.code);
+    res.statusMessage = NOT_FOUND.title;
+    throw new Error("Address not found");
+  }
+
+  return successResponse(res, "Address deleted successfully!", deletedAddress);
+});
+
+/**
+ * @description Set an address as default for current logged in user
+ * @route PATCH /api/v1/profile/address/:addressId/default
+ * @access private
+ */
+const setDefaultAddressController = expressAsyncHandler(async (req, res) => {
+  const updatedAddress = await setDefaultAddress(
+    req.user.id,
+    req.params.addressId
+  );
+
+  if (!updatedAddress) {
+    res.status(NOT_FOUND.code);
+    res.statusMessage = NOT_FOUND.title;
+    throw new Error("Address not found");
+  }
+
+  return successResponse(
+    res,
+    "Default address updated successfully!",
+    updatedAddress
+  );
 });
 
 export {
   currentProfileController,
   updateProfileController,
   saveAddressController,
+  updateAddressController,
+  deleteAddressController,
+  setDefaultAddressController,
 };

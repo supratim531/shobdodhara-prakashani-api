@@ -5,6 +5,9 @@ import {
   currentProfileController,
   updateProfileController,
   saveAddressController,
+  updateAddressController,
+  deleteAddressController,
+  setDefaultAddressController,
 } from "../controllers/profileControllers.js";
 
 const router = Router();
@@ -25,5 +28,14 @@ router
 router
   .route("/address")
   .post(handleValidateToken, handleRole("USER"), saveAddressController);
+
+router
+  .route("/address/:addressId")
+  .patch(handleValidateToken, handleRole("USER"), updateAddressController)
+  .delete(handleValidateToken, handleRole("USER"), deleteAddressController);
+
+router
+  .route("/address/:addressId/default")
+  .patch(handleValidateToken, handleRole("USER"), setDefaultAddressController);
 
 export default router;

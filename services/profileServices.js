@@ -37,4 +37,68 @@ const saveAddress = async (userId, addressData) => {
   return address;
 };
 
-export { currentProfile, updateProfile, saveAddress };
+const updateAddress = async (userId, addressId, updatedAddressData) => {
+  if (updatedAddressData.isDefault === true) {
+    await Address.updateMany(
+      { userId, _id: { $ne: addressId } },
+      { $set: { isDefault: false } }
+    );
+  }
+
+  const updatedAddress = await Address.findOneAndUpdate(
+    { _id: addressId, userId },
+    { $set: updatedAddressData },
+    { new: true }
+  )
+    .select("-userId -createdAt -updatedAt -__v")
+    .lean();
+
+  return updatedAddress;
+};
+
+const deleteAddress = async (userId, addressId) => {
+  const deletedAddress = await Address.findOneAndDelete({
+    _id: addressId,
+    userId,
+  }).lean();
+
+  if (deletedAddress && deletedAddress.isDefault) {
+    const firstAddress = await Address.findOne({ userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (firstAddress) {
+      await Address.findByIdAndUpdate(firstAddress._id, {
+        $set: { isDefault: true },
+      });
+    }
+  }
+
+  return deletedAddress;
+};
+
+const setDefaultAddress = async (userId, addressId) => {
+  await Address.updateMany(
+    { userId, _id: { $ne: addressId } },
+    { $set: { isDefault: false } }
+  );
+
+  const updatedAddress = await Address.findOneAndUpdate(
+    { _id: addressId, userId },
+    { $set: { isDefault: true } },
+    { new: true }
+  )
+    .select("-userId -createdAt -updatedAt -__v")
+    .lean();
+
+  return updatedAddress;
+};
+
+export {
+  currentProfile,
+  updateProfile,
+  saveAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+};

@@ -1,3 +1,13 @@
+export const OK = {
+  code: 200,
+  title: "OK",
+};
+
+export const CREATED = {
+  code: 201,
+  title: "Created",
+};
+
 export const BAD_REQUEST = {
   code: 400,
   title: "Bad Request",

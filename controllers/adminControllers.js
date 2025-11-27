@@ -2,8 +2,8 @@ import sendMail from "../utils/sendMail.js";
 import { login } from "../services/adminServices.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { BAD_REQUEST, UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
 import { validateLoginPayload } from "../validators/adminValidators.js";
+import { BAD_REQUEST, UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
 
 /**
  * @description Login for admin only

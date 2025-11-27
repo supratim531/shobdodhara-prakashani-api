@@ -11,11 +11,18 @@ const addressSchema = new mongoose.Schema(
 
     recipientName: {
       type: String,
+      required: [true, "Recipient name must be provided"],
       trim: true,
       maxlength: 100,
     },
 
     phone: {
+      type: String,
+      required: [true, "Phone must be provided"],
+      trim: true,
+    },
+
+    alternatePhone: {
       type: String,
       trim: true,
     },

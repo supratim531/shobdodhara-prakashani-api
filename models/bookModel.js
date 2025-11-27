@@ -56,6 +56,8 @@ const bookSchema = new mongoose.Schema(
   }
 );
 
+bookSchema.set("toJSON", { versionKey: false });
+
 const Book = mongoose.model("Book", bookSchema);
 
 export default Book;

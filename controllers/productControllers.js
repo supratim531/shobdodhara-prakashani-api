@@ -18,7 +18,7 @@ import {
  * @access private (role: ADMIN)
  */
 const saveProductController = expressAsyncHandler(async (req, res) => {
-  let categoryData = {};
+  let categoryValue = {};
   const { value: productValue, error: productError } = validateProductPayload(
     req.body
   );
@@ -40,7 +40,7 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
       throw bookError;
     }
 
-    categoryData = bookValue;
+    categoryValue = bookValue;
   } else if (productValue.category === "CLOTHES") {
     const { value: clothesValue, error: clothesError } = validateClothesPayload(
       req.body
@@ -52,16 +52,16 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
       throw clothesError;
     }
 
-    categoryData = clothesValue;
+    categoryValue = clothesValue;
   }
 
   try {
-    const product = await saveProduct(productValue, categoryData);
+    const data = await saveProduct(productValue, categoryValue);
 
     return successResponse(
       res,
       "Product saved successfully!",
-      product,
+      data,
       CREATED.code
     );
   } catch (error) {

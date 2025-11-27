@@ -73,6 +73,8 @@ productSchema.index(
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ createdAt: -1 });
 
+productSchema.set("toJSON", { versionKey: false });
+
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;

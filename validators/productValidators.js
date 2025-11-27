@@ -17,7 +17,7 @@ export const validateProductPayload = (payload) => {
       .min(1)
       .required()
       .label("slideImages"),
-  });
+  }).unknown(true);
 
   return productSchema.validate(payload, { abortEarly: false });
 };
@@ -30,7 +30,7 @@ export const validateBookPayload = (payload) => {
     genre: Joi.string().required().label("genre"),
     language: Joi.string().required().label("language"),
     pages: Joi.number().min(1).required().label("pages"),
-  });
+  }).unknown(true);
 
   return bookSchema.validate(payload, { abortEarly: false });
 };
@@ -45,7 +45,7 @@ export const validateClothesPayload = (payload) => {
       .label("gender"),
     material: Joi.string().required().label("material"),
     color: Joi.string().required().label("color"),
-  });
+  }).unknown(true);
 
   return clothesSchema.validate(payload, { abortEarly: false });
 };

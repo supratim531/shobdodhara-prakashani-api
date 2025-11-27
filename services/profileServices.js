@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import Address from "../models/addressModel.js";
 
-const currentProfile = async (userId) => {
+const fetchCurrentProfile = async (userId) => {
   const user = await User.findById(userId).select("-__v").lean();
   user.addresses = await Address.find({ userId })
     .select("-userId -createdAt -updatedAt -__v")
@@ -77,7 +77,7 @@ const deleteAddress = async (userId, addressId) => {
   return deletedAddress;
 };
 
-const setDefaultAddress = async (userId, addressId) => {
+const updateDefaultAddress = async (userId, addressId) => {
   await Address.updateMany(
     { userId, _id: { $ne: addressId } },
     { $set: { isDefault: false } }
@@ -95,10 +95,10 @@ const setDefaultAddress = async (userId, addressId) => {
 };
 
 export {
-  currentProfile,
+  fetchCurrentProfile,
   updateProfile,
   saveAddress,
   updateAddress,
   deleteAddress,
-  setDefaultAddress,
+  updateDefaultAddress,
 };

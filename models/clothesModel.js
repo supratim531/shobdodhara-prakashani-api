@@ -50,6 +50,8 @@ const clothesSchema = new mongoose.Schema(
 
 clothesSchema.index({ clothingType: 1, brand: 1 });
 
+clothesSchema.set("toJSON", { versionKey: false });
+
 const Clothes = mongoose.model("Clothes", clothesSchema);
 
 export default Clothes;

@@ -2,12 +2,12 @@ import { Router } from "express";
 import { handleRole } from "../middlewares/roleHandler.js";
 import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
-  currentProfileController,
+  fetchCurrentProfileController,
   updateProfileController,
   saveAddressController,
   updateAddressController,
   deleteAddressController,
-  setDefaultAddressController,
+  updateDefaultAddressController,
 } from "../controllers/profileControllers.js";
 
 const router = Router();
@@ -17,7 +17,7 @@ router
   .get(
     handleValidateToken,
     handleRole("USER", "ADMIN"),
-    currentProfileController
+    fetchCurrentProfileController
   )
   .patch(
     handleValidateToken,
@@ -36,6 +36,10 @@ router
 
 router
   .route("/address/:addressId/default")
-  .patch(handleValidateToken, handleRole("USER"), setDefaultAddressController);
+  .patch(
+    handleValidateToken,
+    handleRole("USER"),
+    updateDefaultAddressController
+  );
 
 export default router;

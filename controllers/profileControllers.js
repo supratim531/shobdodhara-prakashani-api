@@ -6,12 +6,12 @@ import {
   UNPROCESSABLE_ENTITY,
 } from "../constants/statusCodes.js";
 import {
-  currentProfile,
+  fetchCurrentProfile,
   updateProfile,
   saveAddress,
   updateAddress,
   deleteAddress,
-  setDefaultAddress,
+  updateDefaultAddress,
 } from "../services/profileServices.js";
 import {
   validateUpdateProfilePayload,
@@ -24,8 +24,8 @@ import {
  * @route GET /api/v1/profile/current
  * @access private
  */
-const currentProfileController = expressAsyncHandler(async (req, res) => {
-  const user = await currentProfile(req.user.id);
+const fetchCurrentProfileController = expressAsyncHandler(async (req, res) => {
+  const user = await fetchCurrentProfile(req.user.id);
 
   return successResponse(res, "Current profile fetched.", user);
 });
@@ -124,8 +124,8 @@ const deleteAddressController = expressAsyncHandler(async (req, res) => {
  * @route PATCH /api/v1/profile/address/:addressId/default
  * @access private
  */
-const setDefaultAddressController = expressAsyncHandler(async (req, res) => {
-  const updatedAddress = await setDefaultAddress(
+const updateDefaultAddressController = expressAsyncHandler(async (req, res) => {
+  const updatedAddress = await updateDefaultAddress(
     req.user.id,
     req.params.addressId
   );
@@ -144,10 +144,10 @@ const setDefaultAddressController = expressAsyncHandler(async (req, res) => {
 });
 
 export {
-  currentProfileController,
+  fetchCurrentProfileController,
   updateProfileController,
   saveAddressController,
   updateAddressController,
   deleteAddressController,
-  setDefaultAddressController,
+  updateDefaultAddressController,
 };

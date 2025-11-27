@@ -1,8 +1,15 @@
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
-import { currentProfile, updateProfile } from "../services/profileServices.js";
-import { validateUpdateProfilePayload } from "../validators/profileValidators.js";
+import {
+  currentProfile,
+  updateProfile,
+  saveAddress,
+} from "../services/profileServices.js";
+import {
+  validateUpdateProfilePayload,
+  validateSaveAddressPayload,
+} from "../validators/profileValidators.js";
 
 /**
  * @description Fetch the profile of current logged in user
@@ -12,7 +19,7 @@ import { validateUpdateProfilePayload } from "../validators/profileValidators.js
 const currentProfileController = expressAsyncHandler(async (req, res) => {
   const user = await currentProfile(req.user.id);
 
-  return successResponse(res, "Current profile fetched", user);
+  return successResponse(res, "Current profile fetched.", user);
 });
 
 /**
@@ -34,4 +41,27 @@ const updateProfileController = expressAsyncHandler(async (req, res) => {
   return successResponse(res, "Account details updated!", updatedUser);
 });
 
-export { currentProfileController, updateProfileController };
+/**
+ * @description Save a new address for current logged in user
+ * @route POST /api/v1/profile/address
+ * @access private
+ */
+const saveAddressController = expressAsyncHandler(async (req, res) => {
+  const { value, error } = validateSaveAddressPayload(req.body);
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  const address = await saveAddress(req.user.id, value);
+
+  return successResponse(res, "Address saved successfully!", address);
+});
+
+export {
+  currentProfileController,
+  updateProfileController,
+  saveAddressController,
+};

@@ -48,7 +48,7 @@ const authenticateController = expressAsyncHandler(async (req, res) => {
     console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
   }
 
-  return successResponse(res, `OTP sent successfully at ${email || phone}`, {
+  return successResponse(res, `OTP sent successfully at ${email || phone}.`, {
     contact,
     otp,
   });
@@ -74,7 +74,7 @@ const verifyOTPController = expressAsyncHandler(async (req, res) => {
   if (!user) {
     res.status(BAD_REQUEST.code);
     res.statusMessage = BAD_REQUEST.title;
-    throw new Error("Invalid OTP! Please try again");
+    throw new Error("Invalid OTP! Please try again.");
   }
 
   const accessToken = generateAccessToken(user);
@@ -91,7 +91,7 @@ const verifyOTPController = expressAsyncHandler(async (req, res) => {
     sameSite: "strict",
   });
 
-  return successResponse(res, "Login and verification successful");
+  return successResponse(res, "Login and verification successful!");
 });
 
 /**
@@ -103,7 +103,7 @@ const logoutController = expressAsyncHandler(async (req, res) => {
   res.clearCookie("access-token");
   res.clearCookie("refresh-token");
 
-  return successResponse(res, "User logged out successfully");
+  return successResponse(res, "User logged out successfully.");
 });
 
 export { authenticateController, verifyOTPController, logoutController };

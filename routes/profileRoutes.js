@@ -4,6 +4,7 @@ import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
   currentProfileController,
   updateProfileController,
+  saveAddressController,
 } from "../controllers/profileControllers.js";
 
 const router = Router();
@@ -20,5 +21,9 @@ router
     handleRole("USER", "ADMIN"),
     updateProfileController
   );
+
+router
+  .route("/address")
+  .post(handleValidateToken, handleRole("USER"), saveAddressController);
 
 export default router;

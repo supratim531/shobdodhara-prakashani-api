@@ -43,7 +43,7 @@ const loginController = expressAsyncHandler(async (req, res) => {
       console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
     }
 
-    return successResponse(res, `OTP sent successfully at ${email || phone}`, {
+    return successResponse(res, `OTP sent successfully at ${email || phone}.`, {
       contact,
       otp,
     });

@@ -27,15 +27,9 @@ const addressSchema = new mongoose.Schema(
       trim: true,
     },
 
-    addressLine1: {
+    addressDetails: {
       type: String,
-      required: [true, "Address Line 1 cannot be empty"],
-      trim: true,
-      maxlength: 255,
-    },
-
-    addressLine2: {
-      type: String,
+      required: [true, "Address details cannot be empty"],
       trim: true,
       maxlength: 255,
     },
@@ -44,13 +38,6 @@ const addressSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 150,
-    },
-
-    country: {
-      type: String,
-      required: [true, "Country is required"],
-      trim: true,
-      maxlength: 100,
     },
 
     state: {

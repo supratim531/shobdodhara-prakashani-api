@@ -1,5 +1,5 @@
 import User from "../models/userModel.js";
-import { saveOTP, findOTP } from "./otpServices.js";
+import { saveOTP, fetchOTP } from "./otpServices.js";
 
 const authenticate = async (email, phone) => {
   const contact = email ? `email:${email}` : `phone:${phone}`;
@@ -21,7 +21,7 @@ const authenticate = async (email, phone) => {
 };
 
 const verifyOTP = async (contact, otp) => {
-  const record = await findOTP(contact, otp);
+  const record = await fetchOTP(contact, otp);
 
   if (!record) return null;
 

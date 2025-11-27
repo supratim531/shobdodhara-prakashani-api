@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const validateProductPayload = (payload) => {
+export const validateSaveProductPayload = (payload) => {
   const productSchema = Joi.object({
     category: Joi.string()
       .valid("BOOK", "CLOTHES")
@@ -17,12 +17,12 @@ export const validateProductPayload = (payload) => {
       .min(1)
       .required()
       .label("slideImages"),
-  }).unknown(true);
+  });
 
   return productSchema.validate(payload, { abortEarly: false });
 };
 
-export const validateBookPayload = (payload) => {
+export const validateSaveBookPayload = (payload) => {
   const bookSchema = Joi.object({
     author: Joi.string().min(2).required().label("author"),
     publisher: Joi.string().required().label("publisher"),
@@ -30,12 +30,12 @@ export const validateBookPayload = (payload) => {
     genre: Joi.string().required().label("genre"),
     language: Joi.string().required().label("language"),
     pages: Joi.number().min(1).required().label("pages"),
-  }).unknown(true);
+  });
 
   return bookSchema.validate(payload, { abortEarly: false });
 };
 
-export const validateClothesPayload = (payload) => {
+export const validateSaveClothesPayload = (payload) => {
   const clothesSchema = Joi.object({
     clothingType: Joi.string().required().label("clothingType"),
     brand: Joi.string().required().label("brand"),
@@ -45,7 +45,7 @@ export const validateClothesPayload = (payload) => {
       .label("gender"),
     material: Joi.string().required().label("material"),
     color: Joi.string().required().label("color"),
-  }).unknown(true);
+  });
 
   return clothesSchema.validate(payload, { abortEarly: false });
 };

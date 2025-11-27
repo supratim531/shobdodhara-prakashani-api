@@ -11,7 +11,7 @@ import { BAD_REQUEST, UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
  * @access public
  */
 const loginController = expressAsyncHandler(async (req, res) => {
-  const { value, error } = validateLoginPayload(req.body);
+  const { value: loginData, error } = validateLoginPayload(req.body);
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -19,7 +19,7 @@ const loginController = expressAsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const { email, phone, password } = value;
+  const { email, phone, password } = loginData;
 
   try {
     const { contact, otp } = await login(email, phone, password);
@@ -37,8 +37,7 @@ const loginController = expressAsyncHandler(async (req, res) => {
         <p style="text-align: center;">It's good to have you.</p>
       `,
       };
-      const response = await sendMail(mail);
-      console.log(response);
+      await sendMail(mail);
     } else {
       console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
     }

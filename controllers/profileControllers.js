@@ -36,7 +36,9 @@ const fetchCurrentProfileController = expressAsyncHandler(async (req, res) => {
  * @access private (role: USER, ADMIN)
  */
 const updateProfileController = expressAsyncHandler(async (req, res) => {
-  const { value, error } = validateUpdateProfilePayload(req.body);
+  const { value: updatedUserData, error } = validateUpdateProfilePayload(
+    req.body
+  );
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -44,7 +46,7 @@ const updateProfileController = expressAsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const updatedUser = await updateProfile(req.user.id, value);
+  const updatedUser = await updateProfile(req.user.id, updatedUserData);
 
   return successResponse(res, "Account details updated!", updatedUser);
 });
@@ -55,7 +57,7 @@ const updateProfileController = expressAsyncHandler(async (req, res) => {
  * @access private (role: USER)
  */
 const saveAddressController = expressAsyncHandler(async (req, res) => {
-  const { value, error } = validateSaveAddressPayload(req.body);
+  const { value: addressData, error } = validateSaveAddressPayload(req.body);
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -63,7 +65,7 @@ const saveAddressController = expressAsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const address = await saveAddress(req.user.id, value);
+  const address = await saveAddress(req.user.id, addressData);
 
   return successResponse(
     res,
@@ -79,7 +81,9 @@ const saveAddressController = expressAsyncHandler(async (req, res) => {
  * @access private (role: USER)
  */
 const updateAddressController = expressAsyncHandler(async (req, res) => {
-  const { value, error } = validateUpdateAddressPayload(req.body);
+  const { value: updatedAddressData, error } = validateUpdateAddressPayload(
+    req.body
+  );
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -90,7 +94,7 @@ const updateAddressController = expressAsyncHandler(async (req, res) => {
   const updatedAddress = await updateAddress(
     req.user.id,
     req.params.addressId,
-    value
+    updatedAddressData
   );
 
   if (!updatedAddress) {

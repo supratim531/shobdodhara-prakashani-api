@@ -18,7 +18,9 @@ import {
  * @access public
  */
 const authenticateController = expressAsyncHandler(async (req, res) => {
-  const { value, error } = validateAuthenticatePayload(req.body);
+  const { value: authenticationData, error } = validateAuthenticatePayload(
+    req.body
+  );
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -26,7 +28,7 @@ const authenticateController = expressAsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const { email, phone } = value;
+  const { email, phone } = authenticationData;
   const { contact, otp } = await authenticate(email, phone);
 
   if (email) {
@@ -42,8 +44,7 @@ const authenticateController = expressAsyncHandler(async (req, res) => {
         <p style="text-align: center;">It's good to have you.</p>
       `,
     };
-    const response = await sendMail(mail);
-    console.log(response);
+    await sendMail(mail);
   } else {
     console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
   }
@@ -60,7 +61,7 @@ const authenticateController = expressAsyncHandler(async (req, res) => {
  * @access public
  */
 const verifyOTPController = expressAsyncHandler(async (req, res) => {
-  const { value, error } = validateVerifyOTPPayload(req.body);
+  const { value: verificationData, error } = validateVerifyOTPPayload(req.body);
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -68,7 +69,7 @@ const verifyOTPController = expressAsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const { contact, otp } = value;
+  const { contact, otp } = verificationData;
   const user = await verifyOTP(contact, otp);
 
   if (!user) {

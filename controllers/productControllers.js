@@ -3,16 +3,20 @@ import Clothes from "../models/clothesModel.js";
 import Product from "../models/productModel.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { saveProduct } from "../services/productServices.js";
+import { saveProduct, updateProduct } from "../services/productServices.js";
 import {
   CREATED,
   BAD_REQUEST,
+  NOT_FOUND,
   UNPROCESSABLE_ENTITY,
 } from "../constants/statusCodes.js";
 import {
   validateSaveProductPayload,
   validateSaveBookPayload,
   validateSaveClothesPayload,
+  validateUpdateProductPayload,
+  validateUpdateBookPayload,
+  validateUpdateClothesPayload,
 } from "../validators/productValidators.js";
 
 /**
@@ -97,4 +101,72 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { saveProductController };
+/**
+ * @description Update an existing product with category-specific details
+ * @route PATCH /api/v1/product/:productId
+ * @access private (role: ADMIN)
+ */
+const updateProductController = expressAsyncHandler(async (req, res) => {
+  let categoryData = {};
+  const { bookId, clothesId } = req.query;
+  const bookPayload = pickBySchema(req.body, Book);
+  const clothesPayload = pickBySchema(req.body, Clothes);
+  const productPayload = pickBySchema(req.body, Product);
+
+  const { value: productData, error: productError } =
+    validateUpdateProductPayload(productPayload);
+
+  if (productError) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw productError;
+  }
+
+  if (bookId) {
+    const { value: bookData, error: bookError } =
+      validateUpdateBookPayload(bookPayload);
+
+    if (bookError) {
+      res.status(UNPROCESSABLE_ENTITY.code);
+      res.statusMessage = UNPROCESSABLE_ENTITY.title;
+      throw bookError;
+    }
+
+    categoryData = bookData;
+  } else if (clothesId) {
+    const { value: clothesData, error: clothesError } =
+      validateUpdateClothesPayload(clothesPayload);
+
+    if (clothesError) {
+      res.status(UNPROCESSABLE_ENTITY.code);
+      res.statusMessage = UNPROCESSABLE_ENTITY.title;
+      throw clothesError;
+    }
+
+    categoryData = clothesData;
+  }
+
+  try {
+    const data = await updateProduct(
+      req.params.productId,
+      productData,
+      categoryData,
+      bookId,
+      clothesId
+    );
+
+    return successResponse(res, "Product updated successfully!", data);
+  } catch (error) {
+    if (error.message === "Product not found") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
+export { saveProductController, updateProductController };

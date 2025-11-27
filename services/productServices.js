@@ -31,4 +31,46 @@ const saveProduct = async (productData, categoryData) => {
   };
 };
 
-export { saveProduct };
+const updateProduct = async (
+  productId,
+  productData,
+  categoryData,
+  bookId,
+  clothesId
+) => {
+  const updatedProduct = await Product.findByIdAndUpdate(
+    productId,
+    { $set: productData },
+    { new: true }
+  );
+
+  if (!updatedProduct) {
+    throw new Error("Product not found");
+  }
+
+  let book, clothes;
+
+  if (bookId && Object.keys(categoryData).length > 0) {
+    book = await Book.findByIdAndUpdate(
+      bookId,
+      { $set: categoryData },
+      { new: true }
+    );
+  }
+
+  if (clothesId && Object.keys(categoryData).length > 0) {
+    clothes = await Clothes.findByIdAndUpdate(
+      clothesId,
+      { $set: categoryData },
+      { new: true }
+    );
+  }
+
+  return {
+    product: updatedProduct,
+    ...(book && { book: book.toJSON() }),
+    ...(clothes && { clothes: clothes.toJSON() }),
+  };
+};
+
+export { saveProduct, updateProduct };

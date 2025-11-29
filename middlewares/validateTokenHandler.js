@@ -47,7 +47,7 @@ const handleValidateToken = expressAsyncHandler(async (req, res, next) => {
       } catch (error) {
         res.status(UNAUTHORIZED.code);
         res.statusMessage = UNAUTHORIZED.title;
-        throw error;
+        throw error.error;
       }
     }
   }

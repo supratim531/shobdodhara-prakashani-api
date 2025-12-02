@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
-const orderItemSchema = new mongoose.Schema(
+const cartItemSchema = new mongoose.Schema(
   {
-    orderId: {
+    cartId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "Order",
+      ref: "Cart",
     },
 
     productId: {
@@ -24,11 +24,7 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 1,
-    },
-
-    pricePerUnit: {
-      type: Number,
-      required: true,
+      default: 1,
     },
 
     totalPrice: {
@@ -41,9 +37,9 @@ const orderItemSchema = new mongoose.Schema(
   }
 );
 
-orderItemSchema.index({ orderId: 1 });
-orderItemSchema.index({ productId: 1 });
+cartItemSchema.index({ cartId: 1 });
+cartItemSchema.index({ productId: 1 });
 
-const OrderItem = mongoose.model("OrderItem", orderItemSchema);
+const CartItem = mongoose.model("CartItem", cartItemSchema);
 
-export default OrderItem;
+export default CartItem;

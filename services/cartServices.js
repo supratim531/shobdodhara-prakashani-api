@@ -96,7 +96,7 @@ const updateCartItemQuantity = async (userId, itemId, quantity) => {
   const cartItem = await CartItem.findOne({ _id: itemId, cartId: cart._id });
 
   if (!cartItem) {
-    throw new Error("Cart item not found");
+    throw new Error("Cart item not found!");
   }
 
   const totalPrice = quantity * cartItem.productSnapshot.price;
@@ -108,9 +108,27 @@ const updateCartItemQuantity = async (userId, itemId, quantity) => {
   );
 };
 
+const removeCartItem = async (itemId) => {
+  const removedCartItem = await CartItem.findByIdAndDelete(itemId);
+
+  if (!removedCartItem) {
+    throw new Error("Cart item not found!");
+  }
+
+  return removedCartItem;
+};
+
+const clearCartItems = async (userId) => {
+  const cart = await fetchOrSaveActiveCart(userId);
+
+  return await CartItem.deleteMany({ cartId: cart._id });
+};
+
 export {
   fetchOrSaveActiveCart,
   fetchCartItems,
   saveCartItem,
   updateCartItemQuantity,
+  removeCartItem,
+  clearCartItems,
 };

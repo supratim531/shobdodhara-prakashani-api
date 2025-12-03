@@ -10,11 +10,13 @@ import {
   fetchCartItems,
   saveCartItem,
   updateCartItemQuantity,
+  removeCartItem,
+  clearCartItems,
 } from "../services/cartServices.js";
 
 /**
  * @description Get or create user's active cart
- * @route GET /api/cart
+ * @route GET /api/v1/cart
  * @access private (role: USER)
  */
 const fetchOrSaveActiveCartController = expressAsyncHandler(
@@ -27,7 +29,7 @@ const fetchOrSaveActiveCartController = expressAsyncHandler(
 
 /**
  * @description Fetch cart items for user's active cart
- * @route GET /api/cart/items
+ * @route GET /api/v1/cart/items
  * @access private (role: USER)
  */
 const fetchCartItemsController = expressAsyncHandler(async (req, res) => {
@@ -38,7 +40,7 @@ const fetchCartItemsController = expressAsyncHandler(async (req, res) => {
 
 /**
  * @description Add product to cart
- * @route POST /api/cart/items
+ * @route POST /api/v1/cart/items
  * @access private (role: USER)
  */
 const saveCartItemController = expressAsyncHandler(async (req, res) => {
@@ -58,7 +60,7 @@ const saveCartItemController = expressAsyncHandler(async (req, res) => {
 
 /**
  * @description Update cart item quantity
- * @route PATCH /api/cart/items/:itemId
+ * @route PATCH /api/v1/cart/items/:itemId
  * @access private (role: USER)
  */
 const updateCartItemQuantityController = expressAsyncHandler(
@@ -85,9 +87,34 @@ const updateCartItemQuantityController = expressAsyncHandler(
   }
 );
 
+/**
+ * @description Remove cart item
+ * @route DELETE /api/v1/cart/items/:itemId
+ * @access private (role: USER)
+ */
+const removeCartItemController = expressAsyncHandler(async (req, res) => {
+  const { itemId } = req.params;
+  const removedCartItem = await removeCartItem(itemId);
+
+  return successResponse(res, "Cart item removed!", removedCartItem);
+});
+
+/**
+ * @description Clear all cart items
+ * @route DELETE /api/v1/cart/items
+ * @access private (role: USER)
+ */
+const clearCartItemsController = expressAsyncHandler(async (req, res) => {
+  const data = await clearCartItems(req.user.id);
+
+  return successResponse(res, "All items are removed!", data);
+});
+
 export {
   fetchOrSaveActiveCartController,
   fetchCartItemsController,
   saveCartItemController,
   updateCartItemQuantityController,
+  removeCartItemController,
+  clearCartItemsController,
 };

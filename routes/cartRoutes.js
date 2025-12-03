@@ -6,6 +6,8 @@ import {
   fetchCartItemsController,
   saveCartItemController,
   updateCartItemQuantityController,
+  removeCartItemController,
+  clearCartItemsController,
 } from "../controllers/cartControllers.js";
 
 const router = Router();
@@ -21,7 +23,8 @@ router
 router
   .route("/items")
   .get(handleValidateToken, handleRole("USER"), fetchCartItemsController)
-  .post(handleValidateToken, handleRole("USER"), saveCartItemController);
+  .post(handleValidateToken, handleRole("USER"), saveCartItemController)
+  .delete(handleValidateToken, handleRole("USER"), clearCartItemsController);
 
 router
   .route("/items/:itemId")
@@ -29,6 +32,7 @@ router
     handleValidateToken,
     handleRole("USER"),
     updateCartItemQuantityController
-  );
+  )
+  .delete(handleValidateToken, handleRole("USER"), removeCartItemController);
 
 export default router;

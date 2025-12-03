@@ -185,7 +185,7 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
 
     return successResponse(res, "Product updated successfully!", data);
   } catch (error) {
-    if (error.message === "Product not found") {
+    if (error.message === "Product not found.") {
       res.status(NOT_FOUND.code);
       res.statusMessage = NOT_FOUND.title;
     } else {

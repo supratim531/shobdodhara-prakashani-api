@@ -7,6 +7,13 @@ const fetchOrSaveActiveCart = async (userId) => {
 
   if (!cart) {
     cart = await Cart.create({ userId, status: "ACTIVE" });
+  } else {
+    // refresh updatedAt because user accessed the cart
+    cart = await Cart.findByIdAndUpdate(
+      cart._id,
+      { updatedAt: new Date() },
+      { new: true, timestamps: false }
+    ).select("-__v");
   }
 
   return cart;
@@ -48,7 +55,7 @@ const saveCartItem = async (userId, productId, quantity) => {
   const product = await Product.findById(productId);
 
   if (!product) {
-    throw new Error("Product not found!");
+    throw new Error("Product not found.");
   }
 
   const cart = await fetchOrSaveActiveCart(userId);
@@ -96,7 +103,7 @@ const updateCartItemQuantity = async (userId, itemId, quantity) => {
   const cartItem = await CartItem.findOne({ _id: itemId, cartId: cart._id });
 
   if (!cartItem) {
-    throw new Error("Cart item not found!");
+    throw new Error("Cart item not found.");
   }
 
   const totalPrice = quantity * cartItem.productSnapshot.price;
@@ -108,11 +115,15 @@ const updateCartItemQuantity = async (userId, itemId, quantity) => {
   );
 };
 
-const removeCartItem = async (itemId) => {
-  const removedCartItem = await CartItem.findByIdAndDelete(itemId);
+const removeCartItem = async (userId, itemId) => {
+  const cart = await fetchOrSaveActiveCart(userId);
+  const removedCartItem = await CartItem.findOneAndDelete({
+    _id: itemId,
+    cartId: cart._id,
+  });
 
   if (!removedCartItem) {
-    throw new Error("Cart item not found!");
+    throw new Error("Cart item not found.");
   }
 
   return removedCartItem;
@@ -124,6 +135,53 @@ const clearCartItems = async (userId) => {
   return await CartItem.deleteMany({ cartId: cart._id });
 };
 
+const refreshCartItems = async (userId) => {
+  const cart = await fetchOrSaveActiveCart(userId);
+  const cartItems = await CartItem.find({ cartId: cart._id });
+  const updatedItems = [];
+  const unchangedItems = [];
+  const outOfStockItems = [];
+
+  for (const cartItem of cartItems) {
+    const product = await Product.findById(cartItem.productId);
+
+    if (!product || !product.isActive || product.stock === 0) {
+      outOfStockItems.push(cartItem);
+      continue;
+    }
+
+    const newEffectivePrice = product.discountPrice || product.price;
+    const oldPrice = cartItem.productSnapshot.price;
+    const priceChanged = newEffectivePrice !== oldPrice;
+    const titleChanged = product.title !== cartItem.productSnapshot.title;
+    const imageChanged = product.bannerImage !== cartItem.productSnapshot.image;
+
+    if (priceChanged || titleChanged || imageChanged) {
+      const newTotalPrice = cartItem.quantity * newEffectivePrice;
+
+      await CartItem.findByIdAndUpdate(cartItem._id, {
+        productSnapshot: {
+          title: product.title,
+          image: product.bannerImage,
+          price: newEffectivePrice,
+        },
+        totalPrice: newTotalPrice,
+      });
+
+      updatedItems.push({
+        ...cartItem.toObject(),
+        priceChanged,
+        oldPrice,
+        newPrice: newEffectivePrice,
+      });
+    } else {
+      unchangedItems.push(cartItem);
+    }
+  }
+
+  return { updatedItems, unchangedItems, outOfStockItems };
+};
+
 export {
   fetchOrSaveActiveCart,
   fetchCartItems,
@@ -131,4 +189,5 @@ export {
   updateCartItemQuantity,
   removeCartItem,
   clearCartItems,
+  refreshCartItems,
 };

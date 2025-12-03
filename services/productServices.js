@@ -174,7 +174,7 @@ const updateProduct = async (
   );
 
   if (!updatedProduct) {
-    throw new Error("Product not found");
+    throw new Error("Product not found.");
   }
 
   let book, clothes;

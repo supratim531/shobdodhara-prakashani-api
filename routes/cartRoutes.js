@@ -8,6 +8,7 @@ import {
   updateCartItemQuantityController,
   removeCartItemController,
   clearCartItemsController,
+  refreshCartItemsController,
 } from "../controllers/cartControllers.js";
 
 const router = Router();
@@ -19,6 +20,10 @@ router
     handleRole("USER"),
     fetchOrSaveActiveCartController
   );
+
+router
+  .route("/refresh")
+  .post(handleValidateToken, handleRole("USER"), refreshCartItemsController);
 
 router
   .route("/items")

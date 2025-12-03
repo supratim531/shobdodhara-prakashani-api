@@ -4,6 +4,7 @@ import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
   saveProductController,
   fetchAllProductsController,
+  fetchProductByIdController,
   updateProductController,
 } from "../controllers/productControllers.js";
 
@@ -16,6 +17,7 @@ router
 
 router
   .route("/:productId")
+  .get(fetchProductByIdController)
   .patch(handleValidateToken, handleRole("ADMIN"), updateProductController);
 
 export default router;

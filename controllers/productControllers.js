@@ -6,6 +6,7 @@ import expressAsyncHandler from "express-async-handler";
 import {
   saveProduct,
   fetchAllProducts,
+  fetchProductById,
   updateProduct,
 } from "../services/productServices.js";
 import {
@@ -130,6 +131,32 @@ const fetchAllProductsController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
+ * @description Get an existing product by its id
+ * @route PATCH /api/v1/product/:productId
+ * @access public
+ */
+const fetchProductByIdController = expressAsyncHandler(async (req, res) => {
+  try {
+    const item = await fetchProductById(req.params.productId);
+
+    return successResponse(res, "Product fetched.", item);
+  } catch (error) {
+    if (error.message === "Product not found.") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else if (error.message === "Invalid category found!") {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    } else {
+      res.status(INTERNAL_SERVER_ERROR.code);
+      res.statusMessage = INTERNAL_SERVER_ERROR.title;
+    }
+
+    throw error;
+  }
+});
+
+/**
  * @description Update an existing product with category-specific details
  * @route PATCH /api/v1/product/:productId
  * @access private (role: ADMIN)
@@ -200,5 +227,6 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
 export {
   saveProductController,
   fetchAllProductsController,
+  fetchProductByIdController,
   updateProductController,
 };

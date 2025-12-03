@@ -160,6 +160,47 @@ const fetchAllProducts = async (query) => {
   return { items, meta };
 };
 
+const fetchProductById = async (productId) => {
+  let item;
+  const product = await Product.findById(productId);
+
+  const pipeline = [
+    {
+      $lookup: {
+        from: "products",
+        localField: "productId",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+    { $unwind: "$product" },
+    { $match: { productId: product._id } },
+    {
+      $project: {
+        __v: 0,
+        product: {
+          _id: 0,
+          __v: 0,
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      },
+    },
+  ];
+
+  if (!product) {
+    throw new Error("Product not found.");
+  } else if (product.category === "BOOK") {
+    item = await Book.aggregate(pipeline);
+  } else if (product.category === "CLOTHES") {
+    item = await Clothes.aggregate(pipeline);
+  } else {
+    throw new Error("Invalid category found!");
+  }
+
+  return item;
+};
+
 const updateProduct = async (
   productId,
   productData,
@@ -202,4 +243,4 @@ const updateProduct = async (
   };
 };
 
-export { saveProduct, fetchAllProducts, updateProduct };
+export { saveProduct, fetchAllProducts, fetchProductById, updateProduct };

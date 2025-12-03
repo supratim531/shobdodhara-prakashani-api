@@ -1,4 +1,6 @@
 import Cart from "../models/cartModel.js";
+import CartItem from "../models/cartItemModel.js";
+import Product from "../models/productModel.js";
 
 const fetchOrSaveActiveCart = async (userId) => {
   let cart = await Cart.findOne({ userId, status: "ACTIVE" });
@@ -10,4 +12,60 @@ const fetchOrSaveActiveCart = async (userId) => {
   return cart;
 };
 
-export { fetchOrSaveActiveCart };
+const fetchCartItems = async (userId) => {
+  const cart = await fetchOrSaveActiveCart(userId);
+  const cartItems = await CartItem.find({ cartId: cart._id }).populate(
+    "productId"
+  );
+
+  return cartItems;
+};
+
+const saveCartItem = async (userId, productId, quantity) => {
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new Error("Product not found!");
+  }
+
+  const cart = await fetchOrSaveActiveCart(userId);
+  const effectivePrice = product.discountPrice || product.price;
+  const totalPrice = quantity * effectivePrice;
+  const existingCartItem = await CartItem.findOne({
+    cartId: cart._id,
+    productId,
+  });
+
+  if (existingCartItem) {
+    const newQuantity = existingCartItem.quantity + quantity;
+    const newTotalPrice = newQuantity * effectivePrice;
+
+    return await CartItem.findByIdAndUpdate(
+      existingCartItem._id,
+      {
+        quantity: newQuantity,
+        totalPrice: newTotalPrice,
+        productSnapshot: {
+          title: product.title,
+          image: product.bannerImage,
+          price: effectivePrice,
+        },
+      },
+      { new: true }
+    );
+  }
+
+  return await CartItem.create({
+    cartId: cart._id,
+    productId,
+    quantity,
+    totalPrice,
+    productSnapshot: {
+      title: product.title,
+      image: product.bannerImage,
+      price: effectivePrice,
+    },
+  });
+};
+
+export { fetchOrSaveActiveCart, fetchCartItems, saveCartItem };

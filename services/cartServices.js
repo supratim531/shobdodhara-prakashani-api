@@ -14,9 +14,32 @@ const fetchOrSaveActiveCart = async (userId) => {
 
 const fetchCartItems = async (userId) => {
   const cart = await fetchOrSaveActiveCart(userId);
-  const cartItems = await CartItem.find({ cartId: cart._id }).populate(
-    "productId"
-  );
+  // const cartItems = await CartItem.find({ cartId: cart._id }).populate(
+  //   "productId"
+  // );
+  const cartItems = await CartItem.aggregate([
+    {
+      $lookup: {
+        from: "products",
+        localField: "productId",
+        foreignField: "_id",
+        as: "product",
+      },
+    },
+    { $unwind: "$product" },
+    { $match: { cartId: cart._id } },
+    {
+      $project: {
+        __v: 0,
+        product: {
+          _id: 0,
+          __v: 0,
+          createdAt: 0,
+          updatedAt: 0,
+        },
+      },
+    },
+  ]);
 
   return cartItems;
 };

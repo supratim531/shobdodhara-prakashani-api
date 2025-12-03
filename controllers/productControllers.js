@@ -107,7 +107,7 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
- * @description Get all products
+ * @description Get all products with sort and filter feature
  * @route GET /api/v1/product
  * @access public
  */

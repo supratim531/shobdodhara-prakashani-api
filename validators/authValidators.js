@@ -4,7 +4,10 @@ export const validateAuthenticatePayload = (payload) => {
   const authenticateSchema = Joi.object({
     email: Joi.string().email().label("email"),
     phone: Joi.string()
-      .pattern(/^[0-9]{10}$/)
+      .pattern(/^[0-9]{10}$/, "valid 10 digit phone number")
+      .messages({
+        "string.pattern.name": "phone must be a valid 10 digit number",
+      })
       .label("phone"),
   })
     .xor("email", "phone")

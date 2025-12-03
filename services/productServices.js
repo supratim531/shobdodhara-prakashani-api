@@ -1,6 +1,17 @@
 import Book from "../models/bookModel.js";
 import Clothes from "../models/clothesModel.js";
 import Product from "../models/productModel.js";
+import { getPaginationParams, buildMeta } from "../utils/pagination.js";
+import {
+  PRODUCT_SORT_MAP,
+  BOOK_SORT_MAP,
+  CLOTHES_SORT_MAP,
+} from "../utils/sort.js";
+import {
+  buildProductFilter,
+  buildBookFilter,
+  buildClothesFilter,
+} from "../utils/filter.js";
 
 const saveProduct = async (productData, categoryData) => {
   let book, clothes;
@@ -29,6 +40,124 @@ const saveProduct = async (productData, categoryData) => {
     product,
     ...(book ? { book: book.toJSON() } : { clothes: clothes.toJSON() }),
   };
+};
+
+const fetchAllProducts = async (query) => {
+  let items;
+  const { page, perPage, skip } = getPaginationParams(query);
+
+  if (!query.category) {
+    const sortKey = PRODUCT_SORT_MAP[query.sort] ? query.sort : "newest";
+    const sort = PRODUCT_SORT_MAP[sortKey];
+    const productFilter = buildProductFilter(query);
+
+    console.log(sortKey);
+    console.log(sort);
+    console.dir(productFilter, { depth: null });
+
+    // .sort({ ...sort, score: { $meta: "textScore" } })
+    items = await Product.find(productFilter)
+      .select("-__v")
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage)
+      .lean();
+  } else if (query.category.toUpperCase() === "BOOK") {
+    const sortKey = BOOK_SORT_MAP[query.sort] ? query.sort : "newest";
+    const sort = BOOK_SORT_MAP[sortKey];
+    const bookFilter = buildBookFilter(query);
+
+    console.log(sortKey);
+    console.log(sort);
+    console.dir(bookFilter, { depth: null });
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "products",
+          localField: "productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+
+      // Convert array → single object
+      { $unwind: "$product" },
+
+      // Apply filters on joined data
+      { $match: bookFilter },
+
+      // $sort: { ...sort, score: { $meta: "textScore" } }
+      { $sort: sort },
+      { $skip: skip },
+      { $limit: perPage },
+
+      // Final projection of the aggregated object
+      {
+        $project: {
+          __v: 0,
+          product: {
+            _id: 0,
+            __v: 0,
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        },
+      },
+    ];
+
+    items = await Book.aggregate(pipeline);
+  } else if (query.category.toUpperCase() === "CLOTHES") {
+    const sortKey = CLOTHES_SORT_MAP[query.sort] ? query.sort : "newest";
+    const sort = CLOTHES_SORT_MAP[sortKey];
+    const clothesFilter = buildClothesFilter(query);
+
+    console.log(sortKey);
+    console.log(sort);
+    console.dir(clothesFilter, { depth: null });
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "products",
+          localField: "productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      { $unwind: "$product" },
+      { $match: clothesFilter },
+
+      // $sort: { ...sort, score: { $meta: "textScore" } }
+      { $sort: sort },
+      { $skip: skip },
+      { $limit: perPage },
+      {
+        $project: {
+          __v: 0,
+          product: {
+            _id: 0,
+            __v: 0,
+            createdAt: 0,
+            updatedAt: 0,
+          },
+        },
+      },
+    ];
+
+    items = await Clothes.aggregate(pipeline);
+  } else {
+    throw new Error("Invalid category");
+  }
+
+  const meta = buildMeta({
+    totalItems: items.length,
+    page,
+    perPage,
+    paginationLimit: 10,
+  });
+
+  return { items, meta };
 };
 
 const updateProduct = async (
@@ -73,4 +202,4 @@ const updateProduct = async (
   };
 };
 
-export { saveProduct, updateProduct };
+export { saveProduct, fetchAllProducts, updateProduct };

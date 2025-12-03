@@ -3,12 +3,17 @@ import Clothes from "../models/clothesModel.js";
 import Product from "../models/productModel.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { saveProduct, updateProduct } from "../services/productServices.js";
+import {
+  saveProduct,
+  fetchAllProducts,
+  updateProduct,
+} from "../services/productServices.js";
 import {
   CREATED,
   BAD_REQUEST,
   NOT_FOUND,
   UNPROCESSABLE_ENTITY,
+  INTERNAL_SERVER_ERROR,
 } from "../constants/statusCodes.js";
 import {
   validateSaveProductPayload,
@@ -102,6 +107,29 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
+ * @description Get all products
+ * @route GET /api/v1/product
+ * @access public
+ */
+const fetchAllProductsController = expressAsyncHandler(async (req, res) => {
+  try {
+    const data = await fetchAllProducts(req.query);
+
+    return successResponse(res, "All products fetched", data);
+  } catch (error) {
+    if (error.message === "Invalid category") {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    } else {
+      res.status(INTERNAL_SERVER_ERROR.code);
+      res.statusMessage = INTERNAL_SERVER_ERROR.title;
+    }
+
+    throw error;
+  }
+});
+
+/**
  * @description Update an existing product with category-specific details
  * @route PATCH /api/v1/product/:productId
  * @access private (role: ADMIN)
@@ -169,4 +197,8 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { saveProductController, updateProductController };
+export {
+  saveProductController,
+  fetchAllProductsController,
+  updateProductController,
+};

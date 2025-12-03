@@ -49,6 +49,10 @@ const clothesSchema = new mongoose.Schema(
 );
 
 clothesSchema.index({ clothingType: 1, brand: 1 });
+clothesSchema.index(
+  { clothingType: "text", brand: "text", color: "text" },
+  { weights: { clothingType: 5, brand: 3, color: 1 } }
+);
 
 clothesSchema.set("toJSON", { versionKey: false });
 

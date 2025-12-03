@@ -56,6 +56,11 @@ const bookSchema = new mongoose.Schema(
   }
 );
 
+bookSchema.index(
+  { author: "text", publisher: "text", genre: "text" },
+  { weights: { author: 5, publisher: 3, genre: 1 } }
+);
+
 bookSchema.set("toJSON", { versionKey: false });
 
 const Book = mongoose.model("Book", bookSchema);

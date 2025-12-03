@@ -3,6 +3,7 @@ import { handleRole } from "../middlewares/roleHandler.js";
 import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
   saveProductController,
+  fetchAllProductsController,
   updateProductController,
 } from "../controllers/productControllers.js";
 
@@ -10,6 +11,7 @@ const router = Router();
 
 router
   .route("")
+  .get(fetchAllProductsController)
   .post(handleValidateToken, handleRole("ADMIN"), saveProductController);
 
 router

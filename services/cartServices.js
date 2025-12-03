@@ -91,4 +91,26 @@ const saveCartItem = async (userId, productId, quantity) => {
   });
 };
 
-export { fetchOrSaveActiveCart, fetchCartItems, saveCartItem };
+const updateCartItemQuantity = async (userId, itemId, quantity) => {
+  const cart = await fetchOrSaveActiveCart(userId);
+  const cartItem = await CartItem.findOne({ _id: itemId, cartId: cart._id });
+
+  if (!cartItem) {
+    throw new Error("Cart item not found");
+  }
+
+  const totalPrice = quantity * cartItem.productSnapshot.price;
+
+  return await CartItem.findByIdAndUpdate(
+    itemId,
+    { quantity, totalPrice },
+    { new: true }
+  );
+};
+
+export {
+  fetchOrSaveActiveCart,
+  fetchCartItems,
+  saveCartItem,
+  updateCartItemQuantity,
+};

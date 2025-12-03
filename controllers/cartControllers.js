@@ -1,11 +1,15 @@
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { CREATED, UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
-import { validateSaveCartItem } from "../validators/cartValidators.js";
+import {
+  validateSaveCartItem,
+  validateUpdateCartItemQuantity,
+} from "../validators/cartValidators.js";
 import {
   fetchOrSaveActiveCart,
   fetchCartItems,
   saveCartItem,
+  updateCartItemQuantity,
 } from "../services/cartServices.js";
 
 /**
@@ -35,7 +39,7 @@ const fetchCartItemsController = expressAsyncHandler(async (req, res) => {
 /**
  * @description Add product to cart
  * @route POST /api/cart/items
- * @access private
+ * @access private (role: USER)
  */
 const saveCartItemController = expressAsyncHandler(async (req, res) => {
   const { value: cartItemData, error } = validateSaveCartItem(req.body);
@@ -52,8 +56,38 @@ const saveCartItemController = expressAsyncHandler(async (req, res) => {
   return successResponse(res, "Product added to cart!", cartItem, CREATED.code);
 });
 
+/**
+ * @description Update cart item quantity
+ * @route PATCH /api/cart/items/:itemId
+ * @access private (role: USER)
+ */
+const updateCartItemQuantityController = expressAsyncHandler(
+  async (req, res) => {
+    const { value: updateData, error } = validateUpdateCartItemQuantity(
+      req.body
+    );
+
+    if (error) {
+      res.status(UNPROCESSABLE_ENTITY.code);
+      res.statusMessage = UNPROCESSABLE_ENTITY.title;
+      throw error;
+    }
+
+    const { itemId } = req.params;
+    const { quantity } = updateData;
+    const cartItem = await updateCartItemQuantity(
+      req.user.id,
+      itemId,
+      quantity
+    );
+
+    return successResponse(res, "Cart item quantity updated!", cartItem);
+  }
+);
+
 export {
   fetchOrSaveActiveCartController,
   fetchCartItemsController,
   saveCartItemController,
+  updateCartItemQuantityController,
 };

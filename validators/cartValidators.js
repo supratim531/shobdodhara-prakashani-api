@@ -8,3 +8,11 @@ export const validateSaveCartItem = (payload) => {
 
   return saveCartItemSchema.validate(payload, { abortEarly: false });
 };
+
+export const validateUpdateCartItemQuantity = (payload) => {
+  const updateCartItemQuantitySchema = Joi.object({
+    quantity: Joi.number().integer().min(1).required().label("quantity"),
+  });
+
+  return updateCartItemQuantitySchema.validate(payload, { abortEarly: false });
+};

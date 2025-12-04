@@ -182,16 +182,21 @@ const refreshCartItems = async (userId) => {
   return { updatedItems, unchangedItems, outOfStockItems };
 };
 
-const markInactiveCartsAsAbandoned = async () => {
-  const THRESHOLD = process.env.CART_ABANDON_THRESHOLD_MIN * 60 * 1000;
+const fetchInactiveCarts = async () => {
+  const THRESHOLD = process.env.CART_INACTIVITY_THRESHOLD_MIN * 60 * 1000;
   const cutoffDate = new Date(Date.now() - THRESHOLD);
 
-  const result = await Cart.updateMany(
-    { status: "ACTIVE", updatedAt: { $lt: cutoffDate } },
+  return await Cart.find({
+    status: "ACTIVE",
+    updatedAt: { $lt: cutoffDate },
+  }).lean();
+};
+
+const markCartsAsAbandoned = async (cartIds) => {
+  return await Cart.updateMany(
+    { _id: { $in: cartIds } },
     { $set: { status: "ABANDONED", updatedAt: new Date() } }
   );
-
-  console.log("All inactive carts got abandoned:", result);
 };
 
 export {
@@ -202,5 +207,6 @@ export {
   removeCartItem,
   clearCartItems,
   refreshCartItems,
-  markInactiveCartsAsAbandoned,
+  fetchInactiveCarts,
+  markCartsAsAbandoned,
 };

@@ -1,8 +1,8 @@
 import cron from "node-cron";
 
 export const timers = {
-  everyTenSeconds: "*/10 * * * * *",
-  everyTwentySeconds: "*/20 * * * * *",
+  everyTenSecond: "*/10 * * * * *",
+  everyTwentySecond: "*/20 * * * * *",
   everyMinute: "* * * * *",
   everyFiveMinute: "*/5 * * * *",
   everySixHour: "1 */6 * * *",

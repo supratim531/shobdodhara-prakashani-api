@@ -9,8 +9,8 @@ import productRouter from "./routes/productRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import { connectDatabase } from "./config/dbConfig.js";
 import { timers, cronScheduler } from "./utils/cronSchedular.js";
+import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
 import { handleGlobalError } from "./middlewares/globalErrorHandler.js";
-import { markInactiveCartsAsAbandoned } from "./services/cartServices.js";
 
 dotenv.config({ path: "./.env", quiet: true });
 
@@ -34,9 +34,7 @@ const corsOptions = {
 };
 
 //============================ cron tabs =============================//
-cronScheduler(timers.everyFiveMinute, async () => {
-  await markInactiveCartsAsAbandoned();
-});
+cronScheduler(timers.everyMinute, processInactiveCarts);
 //============================ cron tabs =============================//
 
 app.use(cors(corsOptions));

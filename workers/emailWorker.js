@@ -4,7 +4,6 @@ import sendMail from "../utils/sendMail.js";
 import { EMAIL_QUEUE } from "../constants/queues.js";
 import { redisClient } from "../config/redisConfig.js";
 import { connectDatabase } from "../config/dbConfig.js";
-import { fetchCurrentProfile } from "../services/profileServices.js";
 import {
   SEND_OTP_EMAIL_JOB,
   SEND_CART_REMINDER_JOB,
@@ -21,18 +20,8 @@ const emailJobHandlers = {
   },
 
   [SEND_CART_REMINDER_JOB]: async (job) => {
-    const user = await fetchCurrentProfile(job.data.userId);
-
-    if (user.email) {
-      const res = await sendMail({
-        email: user.email,
-        subject: job.data.mail.subject,
-        body: job.data.mail.body,
-      });
-      return res;
-    } else {
-      await Promise.reject(`Email not found! Try phone: ${user.phone}`);
-    }
+    const res = await sendMail(job.data);
+    return res;
   },
 };
 
@@ -43,8 +32,11 @@ const runEmailWorker = async () => {
     EMAIL_QUEUE,
     async (job) => {
       const handler = emailJobHandlers[job.name];
+
       if (!handler) throw new Error(`Unknown job: ${job.name}`);
-      return await handler(job);
+
+      const returnvalue = await handler(job);
+      return returnvalue;
     },
     {
       connection: { ...redisClient, maxRetriesPerRequest: null },

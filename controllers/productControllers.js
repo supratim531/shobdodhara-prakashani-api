@@ -114,9 +114,9 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
  */
 const fetchAllProductsController = expressAsyncHandler(async (req, res) => {
   try {
-    const data = await fetchAllProducts(req.query);
+    const { items, meta } = await fetchAllProducts(req.query);
 
-    return successResponse(res, "All products fetched", data);
+    return successResponse(res, "All products fetched", { items, meta });
   } catch (error) {
     if (error.message === "Invalid category") {
       res.status(BAD_REQUEST.code);

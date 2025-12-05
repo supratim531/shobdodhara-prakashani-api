@@ -3,11 +3,11 @@ import CartItem from "../models/cartItemModel.js";
 import Product from "../models/productModel.js";
 
 const fetchOrSaveActiveCart = async (userId) => {
-  let cart = await Cart.findOne({ userId, status: "ACTIVE" });
+  let cart = await Cart.findOne({ userId });
 
   if (!cart) {
     cart = await Cart.create({ userId, status: "ACTIVE" });
-  } else {
+  } else if (cart.status === "ACTIVE") {
     // refresh updatedAt because user accessed the cart
     cart = await Cart.findByIdAndUpdate(
       cart._id,
@@ -21,9 +21,6 @@ const fetchOrSaveActiveCart = async (userId) => {
 
 const fetchCartItems = async (userId) => {
   const cart = await fetchOrSaveActiveCart(userId);
-  // const cartItems = await CartItem.find({ cartId: cart._id }).populate(
-  //   "productId"
-  // );
   const cartItems = await CartItem.aggregate([
     {
       $lookup: {
@@ -60,17 +57,21 @@ const saveCartItem = async (userId, productId, quantity) => {
 
   const cart = await fetchOrSaveActiveCart(userId);
   const effectivePrice = product.discountPrice || product.price;
-  const totalPrice = quantity * effectivePrice;
   const existingCartItem = await CartItem.findOne({
     cartId: cart._id,
     productId,
   });
+  const insufficientStockMessage = `
+    This website has only ${product.stock} of these item available. To get more contact to admin
+  `;
 
   if (existingCartItem) {
-    const newQuantity = existingCartItem.quantity + quantity;
+    const requestedTotalQuantity = existingCartItem.quantity + quantity;
+    const stockReduced = product.stock < requestedTotalQuantity;
+    const newQuantity = stockReduced ? product.stock : requestedTotalQuantity;
     const newTotalPrice = newQuantity * effectivePrice;
 
-    return await CartItem.findByIdAndUpdate(
+    const updatedCartItem = await CartItem.findByIdAndUpdate(
       existingCartItem._id,
       {
         quantity: newQuantity,
@@ -83,36 +84,74 @@ const saveCartItem = async (userId, productId, quantity) => {
       },
       { new: true }
     );
-  }
 
-  return await CartItem.create({
-    cartId: cart._id,
-    productId,
-    quantity,
-    totalPrice,
-    productSnapshot: {
-      title: product.title,
-      image: product.bannerImage,
-      price: effectivePrice,
-    },
-  });
+    const notification = {
+      isTrue: stockReduced,
+      message: stockReduced ? insufficientStockMessage : null,
+    };
+
+    return { item: updatedCartItem, notification };
+  } else {
+    const stockReduced = product.stock < quantity;
+    quantity = stockReduced ? product.stock : quantity;
+    const totalPrice = quantity * effectivePrice;
+
+    const createdCartItem = await CartItem.create({
+      cartId: cart._id,
+      productId,
+      quantity,
+      totalPrice,
+      productSnapshot: {
+        title: product.title,
+        image: product.bannerImage,
+        price: effectivePrice,
+      },
+    });
+
+    const notification = {
+      isTrue: stockReduced,
+      message: stockReduced ? insufficientStockMessage : null,
+    };
+
+    return { item: createdCartItem, notification };
+  }
 };
 
 const updateCartItemQuantity = async (userId, itemId, quantity) => {
   const cart = await fetchOrSaveActiveCart(userId);
   const cartItem = await CartItem.findOne({ _id: itemId, cartId: cart._id });
+  const product = await Product.findById(cartItem.productId);
 
   if (!cartItem) {
     throw new Error("Cart item not found.");
   }
 
-  const totalPrice = quantity * cartItem.productSnapshot.price;
+  if (!product) {
+    throw new Error("Product not found.");
+  }
 
-  return await CartItem.findByIdAndUpdate(
+  const effectivePrice = product.discountPrice || product.price;
+  const stockReduced = product.stock < quantity;
+  const newQuantity = stockReduced ? product.stock : quantity;
+  const newTotalPrice = newQuantity * effectivePrice;
+
+  const updatedCartItem = await CartItem.findByIdAndUpdate(
     itemId,
-    { quantity, totalPrice },
+    {
+      quantity: newQuantity,
+      totalPrice: newTotalPrice,
+    },
     { new: true }
   );
+
+  const notification = {
+    isTrue: stockReduced,
+    message: stockReduced
+      ? `This website has only ${product.stock} of these item available. To get more contact to admin`
+      : null,
+  };
+
+  return { item: updatedCartItem, notification };
 };
 
 const removeCartItem = async (userId, itemId) => {
@@ -139,13 +178,21 @@ const refreshCartItems = async (userId) => {
   const cart = await fetchOrSaveActiveCart(userId);
   const cartItems = await CartItem.find({ cartId: cart._id });
   const updatedItems = [];
+  const deletedItems = [];
   const unchangedItems = [];
   const outOfStockItems = [];
 
   for (const cartItem of cartItems) {
     const product = await Product.findById(cartItem.productId);
 
-    if (!product || !product.isActive || product.stock === 0) {
+    // If product deleted or inactive → remove item
+    if (!product || !product.isActive) {
+      await CartItem.deleteOne({ productId: cartItem.productId });
+      deletedItems.push(cartItem);
+      continue;
+    }
+
+    if (product.stock <= 0) {
       outOfStockItems.push(cartItem);
       continue;
     }
@@ -153,11 +200,13 @@ const refreshCartItems = async (userId) => {
     const newEffectivePrice = product.discountPrice || product.price;
     const oldPrice = cartItem.productSnapshot.price;
     const priceChanged = newEffectivePrice !== oldPrice;
+    const stockReduced = product.stock < cartItem.quantity;
     const titleChanged = product.title !== cartItem.productSnapshot.title;
     const imageChanged = product.bannerImage !== cartItem.productSnapshot.image;
 
-    if (priceChanged || titleChanged || imageChanged) {
-      const newTotalPrice = cartItem.quantity * newEffectivePrice;
+    if (priceChanged || stockReduced || titleChanged || imageChanged) {
+      const newQuantity = stockReduced ? product.stock : cartItem.quantity;
+      const newTotalPrice = newQuantity * newEffectivePrice;
 
       await CartItem.findByIdAndUpdate(cartItem._id, {
         productSnapshot: {
@@ -165,6 +214,7 @@ const refreshCartItems = async (userId) => {
           image: product.bannerImage,
           price: newEffectivePrice,
         },
+        quantity: newQuantity,
         totalPrice: newTotalPrice,
       });
 
@@ -173,13 +223,43 @@ const refreshCartItems = async (userId) => {
         priceChanged,
         oldPrice,
         newPrice: newEffectivePrice,
+        stockReduced,
+        oldQuantity: cartItem.quantity,
+        newQuantity,
       });
     } else {
       unchangedItems.push(cartItem);
     }
   }
 
-  return { updatedItems, unchangedItems, outOfStockItems };
+  return { unchangedItems, updatedItems, outOfStockItems, deletedItems };
+};
+
+const reactivateCart = async (userId) => {
+  let cart = await Cart.findOne({ userId });
+
+  if (!cart) {
+    return await fetchOrSaveActiveCart(userId);
+  } else if (cart.status === "ACTIVE") {
+    return cart;
+  }
+
+  cart = await Cart.findByIdAndUpdate(
+    cart._id,
+    { status: "ACTIVE" },
+    { new: true }
+  ).select("-__v");
+
+  const { unchangedItems, updatedItems, outOfStockItems, deletedItems } =
+    await refreshCartItems(userId);
+
+  return {
+    item: cart,
+    unchangedItems,
+    updatedItems,
+    outOfStockItems,
+    deletedItems,
+  };
 };
 
 const fetchInactiveCarts = async () => {
@@ -207,6 +287,7 @@ export {
   removeCartItem,
   clearCartItems,
   refreshCartItems,
+  reactivateCart,
   fetchInactiveCarts,
   markCartsAsAbandoned,
 };

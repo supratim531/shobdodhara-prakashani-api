@@ -9,6 +9,7 @@ import {
   removeCartItemController,
   clearCartItemsController,
   refreshCartItemsController,
+  reactivateCartController,
 } from "../controllers/cartControllers.js";
 
 const router = Router();
@@ -24,6 +25,10 @@ router
 router
   .route("/refresh")
   .post(handleValidateToken, handleRole("USER"), refreshCartItemsController);
+
+router
+  .route("/reactivate")
+  .post(handleValidateToken, handleRole("USER"), reactivateCartController);
 
 router
   .route("/items")

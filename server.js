@@ -50,7 +50,7 @@ app.use(handleGlobalError);
 
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "Node.js server is up and running - OK!",
+    message: "Node.js server is up and running",
   });
 });
 

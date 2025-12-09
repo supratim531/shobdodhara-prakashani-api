@@ -164,6 +164,10 @@ const fetchProductById = async (productId) => {
   let item;
   const product = await Product.findById(productId);
 
+  if (!product) {
+    throw new Error("Product not found.");
+  }
+
   const pipeline = [
     {
       $lookup: {
@@ -188,9 +192,7 @@ const fetchProductById = async (productId) => {
     },
   ];
 
-  if (!product) {
-    throw new Error("Product not found.");
-  } else if (product.category === "BOOK") {
+  if (product.category === "BOOK") {
     item = await Book.aggregate(pipeline);
   } else if (product.category === "CLOTHES") {
     item = await Clothes.aggregate(pipeline);
@@ -198,7 +200,7 @@ const fetchProductById = async (productId) => {
     throw new Error("Invalid category found!");
   }
 
-  return item;
+  return item[0];
 };
 
 const updateProduct = async (

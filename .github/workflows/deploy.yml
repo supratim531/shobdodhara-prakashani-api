@@ -1,0 +1,49 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main # deploy when pushed to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 📦 Install dependencies (for test/build)
+        run: npm install
+
+      # OPTIONAL: run tests
+      # - name: Test
+      #   run: npm test
+
+      - name: 🚀 Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ${{ secrets.VPS_PROJECT_PATH }}
+
+            echo "→ Pulling latest code"
+            git pull origin main
+
+            echo "→ Installing node modules"
+            npm install
+
+            echo "→ Using development env file"
+            export $(grep -v '^#' .env.development | xargs)
+
+            echo "→ Restarting PM2"
+            pm2 start ecosystem.config.js --env development || pm2 restart shobdodhara
+
+            pm2 save

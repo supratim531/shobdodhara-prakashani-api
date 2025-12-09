@@ -50,13 +50,13 @@ app.use(handleGlobalError);
 
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "Node.js server is up and running",
+    message: "Node.js server is up and running!",
   });
 });
 
 app.get("/health", (req, res) => {
   res.status(200).json({
-    message: "Backend server is healthy and running 😊",
+    message: "Backend server is healthy and running! 😊",
   });
 });
 

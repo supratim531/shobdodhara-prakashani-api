@@ -21,10 +21,6 @@ jobs:
       - name: 📦 Install dependencies (for test/build)
         run: npm install
 
-      # OPTIONAL: run tests
-      # - name: Test
-      #   run: npm test
-
       - name: 🚀 Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -45,5 +41,4 @@ jobs:
 
             echo "→ Restarting PM2"
             pm2 start ecosystem.config.cjs --env development || pm2 restart shobdodhara
-
             pm2 save

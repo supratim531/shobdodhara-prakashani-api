@@ -40,5 +40,5 @@ jobs:
             export $(grep -v '^#' .env.development | xargs)
 
             echo "→ Restarting PM2"
-            pm2 start ecosystem.config.cjs --env development || pm2 restart shobdodhara
+            pm2 start ecosystem.config.cjs --env development || pm2 restart shobdodhara --update-env
             pm2 save

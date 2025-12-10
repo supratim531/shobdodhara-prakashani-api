@@ -2,7 +2,11 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import User from "../models/userModel.js";
 
-dotenv.config({ path: "./.env", quiet: true });
+const environment = process.env.NODE_ENV || "development";
+const ENV_PATH =
+  environment === "production" ? "./.env.production" : "./.env.development";
+
+dotenv.config({ path: ENV_PATH, quiet: true });
 
 const createAdmin = async () => {
   try {
@@ -24,6 +28,7 @@ const createAdmin = async () => {
         password: hashedPassword,
         role: "ADMIN",
         isOnboarded: true,
+        usedCoupons: [],
       });
 
       console.log("Admin created successfully:", admin);

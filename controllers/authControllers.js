@@ -81,16 +81,17 @@ const verifyOTPController = expressAsyncHandler(async (req, res) => {
 
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
+  const environment = process.env.NODE_ENV || "development";
 
   res.cookie("access-token", accessToken, {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: environment === "production" ? true : false,
+    sameSite: environment === "production" ? "none" : "lax",
   });
   res.cookie("refresh-token", refreshToken, {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: environment === "production" ? true : false,
+    sameSite: environment === "production" ? "none" : "lax",
   });
 
   return successResponse(res, "Login and verification successful!");

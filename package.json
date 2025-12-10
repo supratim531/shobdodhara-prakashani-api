@@ -1,5 +1,5 @@
 {
-  "name": "shobdodhara-prakashani-backend",
+  "name": "shobdodhara-prakashani-api",
   "version": "1.0.0",
   "description": "This is the backend server for shobdodhara prakashani ecommerce",
   "main": "server.js",

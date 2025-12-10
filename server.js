@@ -13,7 +13,11 @@ import { timers, cronScheduler } from "./utils/cronSchedular.js";
 import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
 import { handleGlobalError } from "./middlewares/globalErrorHandler.js";
 
-dotenv.config({ path: "./.env", quiet: true });
+const environment = process.env.NODE_ENV || "development";
+const ENV_PATH =
+  environment === "production" ? "./.env.production" : "./.env.development";
+
+dotenv.config({ path: ENV_PATH, quiet: true });
 
 connectDatabase();
 

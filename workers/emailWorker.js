@@ -9,7 +9,11 @@ import {
   SEND_CART_REMINDER_JOB,
 } from "../constants/jobs.js";
 
-dotenv.config({ path: "./.env.development", quiet: true });
+const environment = process.env.NODE_ENV || "development";
+const ENV_PATH =
+  environment === "production" ? "./.env.production" : "./.env.development";
+
+dotenv.config({ path: ENV_PATH, quiet: true });
 
 connectDatabase();
 

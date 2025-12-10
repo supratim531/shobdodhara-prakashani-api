@@ -1,26 +1,26 @@
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 
-dotenv.config({ path: "./.env", quiet: true });
+const environment = process.env.NODE_ENV || "development";
+const ENV_PATH =
+  environment === "production" ? "./.env.production" : "./.env.development";
 
-console.log(process.env.SMTP_HOST);
-console.log(process.env.SMTP_PORT);
-console.log(process.env.EMAIL_USER);
-console.log(process.env.EMAIL_PASS);
+dotenv.config({ path: ENV_PATH, quiet: true });
 
-const transporter = nodemailer.createTransport({
-  // host: process.env.SMTP_HOST || "smtp.gmail.com",
-  // port: Number(process.env.SMTP_PORT) || 587, // 465 or 587
-  // secure: Number(process.env.SMTP_PORT) === 587 ? false : true, // true for 465, false for 587
+const configuration = {
   host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  requireTLS: true,
+  port: Number(process.env.SMTP_PORT) || 587, // 465 or 587
+  secure: Number(process.env.SMTP_PORT) === 587 ? false : true, // true for 465, false for 587
+  requireTLS: Number(process.env.SMTP_PORT) === 587 ? true : false, // true for 587, false for 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-});
+};
+
+const transporter = nodemailer.createTransport({ ...configuration });
+
+console.log("sendMail.js: transporter ->", environment, configuration);
 
 const sendMail = async ({ email, subject, body }) => {
   const mail = {

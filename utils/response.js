@@ -36,7 +36,7 @@ export const errorResponse = (
     }
   }
 
-  if (process.env.ENVIRONMENT === "dev" && stackTrace) {
+  if (process.env.NODE_ENV !== "production" && stackTrace) {
     response.stackTrace = stackTrace;
   }
 

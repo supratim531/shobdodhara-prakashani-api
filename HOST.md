@@ -16,7 +16,7 @@ sudo apt-get install build-essential
 ```
 git clone https://<username>:<personal-access-token>@github.com/Young-Architects/shobdodhara-prakashani-api.git
 cd shobdodhara-prakashani-api/
-sudo vi .env
+sudo vi .env.development
 npm install
 ```
 

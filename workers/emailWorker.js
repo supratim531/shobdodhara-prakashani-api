@@ -9,7 +9,7 @@ import {
   SEND_CART_REMINDER_JOB,
 } from "../constants/jobs.js";
 
-dotenv.config({ path: "./.env", quiet: true });
+dotenv.config({ path: "./.env.development", quiet: true });
 
 connectDatabase();
 

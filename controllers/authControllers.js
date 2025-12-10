@@ -84,13 +84,13 @@ const verifyOTPController = expressAsyncHandler(async (req, res) => {
 
   res.cookie("access-token", accessToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: false,
+    sameSite: "lax",
   });
   res.cookie("refresh-token", refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    secure: false,
+    sameSite: "lax",
   });
 
   return successResponse(res, "Login and verification successful!");

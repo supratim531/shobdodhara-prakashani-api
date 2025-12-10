@@ -3,6 +3,11 @@ import nodemailer from "nodemailer";
 
 dotenv.config({ path: "./.env", quiet: true });
 
+console.log(process.env.SMTP_HOST);
+console.log(process.env.SMTP_PORT);
+console.log(process.env.EMAIL_USER);
+console.log(process.env.EMAIL_PASS);
+
 const transporter = nodemailer.createTransport({
   // host: process.env.SMTP_HOST || "smtp.gmail.com",
   // port: Number(process.env.SMTP_PORT) || 587, // 465 or 587

@@ -24,14 +24,16 @@ connectDatabase();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = ["http://localhost:3000"];
+// const allowedOrigins = ["http://localhost:3000"];
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // allow
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
+    // if (!origin || allowedOrigins.includes(origin)) {
+    //   callback(null, true); // allow
+    // } else {
+    //   callback(new Error("Not allowed by CORS"));
+    // }
+
+    callback(null, true); // allow every origin
   },
   credentials: true,
   optionsSuccessStatus: 200,

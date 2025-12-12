@@ -8,6 +8,13 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
     },
 
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      ref: "Payment",
+    },
+
     totalPrice: {
       type: Number,
       required: true,
@@ -15,14 +22,12 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      required: true,
+      enum: ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"],
+      default: "CONFIRMED",
     },
 
-    paymentId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    // Address snapshot
+    shippingAddress: { type: Object, required: true },
 
     orderedAt: {
       type: Date,

@@ -2,39 +2,41 @@ import mongoose from "mongoose";
 
 const paymentSchema = new mongoose.Schema(
   {
-    orderId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
+      index: true,
+    },
+
+    orderId: {
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
       index: true,
     },
 
-    method: {
-      type: String,
-      required: true,
-    },
+    // Gateway fields
+    gatewayOrderId: { type: String, required: true, unique: true }, // Razorpay order_id
+    gatewayPaymentId: { type: String, unique: true, sparse: true }, // Razorpay payment_id
+
+    amount: { type: Number, required: true },
+    currency: { type: String, default: "INR" },
+    method: { type: String, required: true },
 
     status: {
       type: String,
-      required: true,
-      index: true,
+      enum: ["CREATED", "ATTEMPTED", "CAPTURED", "FAILED", "REFUNDED"],
+      default: "CREATED",
     },
 
-    amount: {
-      type: Number,
-      required: true,
-    },
+    // Timestamps
+    createdAt: { type: Date, default: Date.now },
+    attemptedAt: { type: Date },
+    capturedAt: { type: Date },
 
-    transactionId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-
-    paidAt: {
-      type: Date,
-      required: true,
-    },
+    // Metadata
+    gatewayResponse: { type: Object }, // Store full gateway response
+    failureReason: { type: String },
   },
   {
     timestamps: true,

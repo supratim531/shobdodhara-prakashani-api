@@ -6,16 +6,16 @@ import {
   NOT_FOUND,
   UNPROCESSABLE_ENTITY,
 } from "../constants/statusCodes.js";
-import { checkoutRefresh } from "../services/checkoutServices.js";
-import { validateCheckoutRefreshPayload } from "../validators/checkoutValidators.js";
+import { prepareCheckout } from "../services/checkoutServices.js";
+import { validatePrepareCheckoutPayload } from "../validators/checkoutValidators.js";
 
 /**
  * @description Process checkout and create order
- * @route POST /api/v1/checkout/refresh
+ * @route POST /api/v1/checkout
  * @access private (role: USER)
  */
-const checkoutRefreshController = expressAsyncHandler(async (req, res) => {
-  const { value: checkoutData, error } = validateCheckoutRefreshPayload(
+const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
+  const { value: checkoutData, error } = validatePrepareCheckoutPayload(
     req.body
   );
 
@@ -27,7 +27,7 @@ const checkoutRefreshController = expressAsyncHandler(async (req, res) => {
 
   try {
     const { addressId } = checkoutData;
-    const checkoutResult = await checkoutRefresh(req.user.id, addressId);
+    const checkoutResult = await prepareCheckout(req.user.id, addressId);
 
     return successResponse(
       res,
@@ -55,4 +55,4 @@ const checkoutRefreshController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { checkoutRefreshController };
+export { prepareCheckoutController };

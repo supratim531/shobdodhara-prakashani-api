@@ -2,7 +2,7 @@ import Product from "../models/productModel.js";
 import { fetchCurrentProfile } from "./profileServices.js";
 import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 
-const checkoutRefresh = async (userId, addressId) => {
+const prepareCheckout = async (userId, addressId) => {
   // Validate address
   const user = await fetchCurrentProfile(userId);
   const address = user.addresses.find(
@@ -26,7 +26,6 @@ const checkoutRefresh = async (userId, addressId) => {
       _id: item.productId,
       isActive: true,
     });
-    const effectivePrice = product.discountPrice || product.price;
 
     if (!product) {
       throw new Error(`${item.productSnapshot.title} is no longer available.`);
@@ -40,6 +39,8 @@ const checkoutRefresh = async (userId, addressId) => {
     }
 
     // Price check — if product price changed after cart added
+    const effectivePrice = product.discountPrice || product.price;
+
     if (effectivePrice !== item.productSnapshot.price) {
       throw new Error(
         `${item.productSnapshot.title} price has changed. Please refresh cart.`
@@ -89,4 +90,4 @@ const checkoutRefresh = async (userId, addressId) => {
   };
 };
 
-export { checkoutRefresh };
+export { prepareCheckout };

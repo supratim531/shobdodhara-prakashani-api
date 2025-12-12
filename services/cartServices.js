@@ -258,8 +258,9 @@ const fetchCartSummary = async (userId) => {
     cartSummary.subtotal += item.totalPrice;
     const product = await Product.findById(item.productId);
 
-    if (product && product.discountPrice) {
-      const diff = product.price - product.discountPrice;
+    if (product && product.price) {
+      const effectivePrice = product.discountPrice || product.price;
+      const diff = product.price - effectivePrice;
       cartSummary.saved += diff * item.quantity;
     }
   }

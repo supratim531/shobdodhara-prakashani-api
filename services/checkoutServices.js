@@ -68,6 +68,7 @@ const prepareCheckout = async (userId, addressId) => {
     amount: totalAmount,
     currency: "INR",
     notes: {
+      address,
       customerId: userId,
       customerEmail: user.email,
       customerPhone: user.phone,

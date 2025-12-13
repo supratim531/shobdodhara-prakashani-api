@@ -9,6 +9,7 @@ import {
   deleteAddressController,
   updateDefaultAddressController,
 } from "../controllers/profileControllers.js";
+import { fetchUserOrdersController, fetchOrderByIdController } from "../controllers/orderControllers.js";
 
 const router = Router();
 
@@ -41,5 +42,13 @@ router
     handleRole("USER"),
     updateDefaultAddressController
   );
+
+router
+  .route("/orders")
+  .get(handleValidateToken, handleRole("USER"), fetchUserOrdersController);
+
+router
+  .route("/orders/:orderId")
+  .get(handleValidateToken, handleRole("USER"), fetchOrderByIdController);
 
 export default router;

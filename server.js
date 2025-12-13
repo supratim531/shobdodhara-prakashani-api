@@ -12,6 +12,7 @@ import checkoutRouter from "./routes/checkoutRoutes.js";
 import { connectDatabase } from "./config/dbConfig.js";
 import { timers, cronScheduler } from "./utils/cronSchedular.js";
 import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
+import processExpiredReservations from "./cron-jobs/processExpiredReservations.js";
 import { handleGlobalError } from "./middlewares/globalErrorHandler.js";
 
 const environment = process.env.NODE_ENV || "development";
@@ -43,6 +44,7 @@ const corsOptions = {
 
 //============================ cron tabs =============================//
 cronScheduler(timers.everyMinute, processInactiveCarts);
+cronScheduler(timers.everyMinute, processExpiredReservations);
 //============================ cron tabs =============================//
 
 app.use(cors(corsOptions));

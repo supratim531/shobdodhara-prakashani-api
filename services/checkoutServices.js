@@ -1,4 +1,5 @@
 import Product from "../models/productModel.js";
+import Reservation from "../models/reservationModel.js";
 import { fetchCurrentProfile } from "./profileServices.js";
 import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 
@@ -20,7 +21,10 @@ const prepareCheckout = async (userId, addressId) => {
     throw new Error("Cart is empty.");
   }
 
-  // Re-validate product price + stock (FINAL validation)
+  // Clear any existing reservations for this user
+  await Reservation.deleteMany({ userId });
+
+  // Re-validate product price + stock
   for (const item of cartItems) {
     const product = await Product.findOne({
       _id: item.productId,
@@ -31,7 +35,7 @@ const prepareCheckout = async (userId, addressId) => {
       throw new Error(`${item.productSnapshot.title} is no longer available.`);
     }
 
-    // Stock check only (no reservation).
+    // Stock check
     if (product.stock < item.quantity) {
       throw new Error(
         `${item.productSnapshot.title} has only ${product.stock} left.`
@@ -46,6 +50,20 @@ const prepareCheckout = async (userId, addressId) => {
         `${item.productSnapshot.title} price has changed. Please refresh cart.`
       );
     }
+
+    // Create reservation
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+    await Reservation.create({
+      productId: item.productId,
+      userId,
+      quantity: item.quantity,
+      expiresAt,
+    });
+
+    // Reduce available stock
+    await Product.findByIdAndUpdate(item.productId, {
+      $inc: { stock: -item.quantity },
+    });
   }
 
   const items = cartItems.map((cartItem) => ({

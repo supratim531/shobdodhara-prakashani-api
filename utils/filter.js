@@ -23,8 +23,11 @@ export function buildProductFilter(query) {
   }
 
   // filter for price range = { ..., stock: { $gt, $eq } }
-  if (query.inStock === "true") filter.stock.$gt = 0;
-  else if (query.inStock === "false") filter.stock.$eq = 0;
+  if (query.inStock) {
+    filter.stock = {};
+    if (query.inStock === "true") filter.stock.$gt = 0;
+    else if (query.inStock === "false") filter.stock.$eq = 0;
+  }
 
   // text search (search for the applied index on title and description)
   if (query.query) {

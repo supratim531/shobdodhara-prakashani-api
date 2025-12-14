@@ -1,6 +1,7 @@
 import Book from "../models/bookModel.js";
 import Clothes from "../models/clothesModel.js";
 import Product from "../models/productModel.js";
+import { buildProductAggregationPipeline } from "../utils/query.js";
 import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 import {
   PRODUCT_SORT_MAP,
@@ -56,6 +57,7 @@ const fetchAllProducts = async (query) => {
     console.dir(productFilter, { depth: null });
 
     totalItems = await Product.find(productFilter).countDocuments();
+
     // .sort({ ...sort, score: { $meta: "textScore" } })
     items = await Product.find(productFilter)
       .select("-__v")
@@ -73,60 +75,18 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(bookFilter, { depth: null });
 
-    items = await Book.aggregate([
-      {
-        $lookup: {
-          from: "products",
-          localField: "productId",
-          foreignField: "_id",
-          as: "product",
-        },
-      },
-
-      // Convert array → single object
-      { $unwind: "$product" },
-
-      // Apply filters on joined data
-      { $match: bookFilter },
-    ]);
+    items = await Book.aggregate(
+      buildProductAggregationPipeline({ filter: bookFilter })
+    );
     totalItems = items.length;
-
-    const pipeline = [
-      {
-        $lookup: {
-          from: "products",
-          localField: "productId",
-          foreignField: "_id",
-          as: "product",
-        },
-      },
-
-      // Convert array → single object
-      { $unwind: "$product" },
-
-      // Apply filters on joined data
-      { $match: bookFilter },
-
-      // $sort: { ...sort, score: { $meta: "textScore" } }
-      { $sort: sort },
-      { $skip: skip },
-      { $limit: perPage },
-
-      // Final projection of the aggregated object
-      {
-        $project: {
-          __v: 0,
-          product: {
-            _id: 0,
-            __v: 0,
-            createdAt: 0,
-            updatedAt: 0,
-          },
-        },
-      },
-    ];
-
-    items = await Book.aggregate(pipeline);
+    items = await Book.aggregate(
+      buildProductAggregationPipeline({
+        filter: bookFilter,
+        sort,
+        skip,
+        limit: perPage,
+      })
+    );
   } else if (query.category.toUpperCase() === "CLOTHES") {
     const sortKey = CLOTHES_SORT_MAP[query.sort] ? query.sort : "newest";
     const sort = CLOTHES_SORT_MAP[sortKey];
@@ -136,54 +96,18 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(clothesFilter, { depth: null });
 
-    items = await Book.aggregate([
-      {
-        $lookup: {
-          from: "products",
-          localField: "productId",
-          foreignField: "_id",
-          as: "product",
-        },
-      },
-
-      // Convert array → single object
-      { $unwind: "$product" },
-
-      // Apply filters on joined data
-      { $match: clothesFilter },
-    ]);
+    items = await Clothes.aggregate(
+      buildProductAggregationPipeline({ filter: clothesFilter })
+    );
     totalItems = items.length;
-
-    const pipeline = [
-      {
-        $lookup: {
-          from: "products",
-          localField: "productId",
-          foreignField: "_id",
-          as: "product",
-        },
-      },
-      { $unwind: "$product" },
-      { $match: clothesFilter },
-
-      // $sort: { ...sort, score: { $meta: "textScore" } }
-      { $sort: sort },
-      { $skip: skip },
-      { $limit: perPage },
-      {
-        $project: {
-          __v: 0,
-          product: {
-            _id: 0,
-            __v: 0,
-            createdAt: 0,
-            updatedAt: 0,
-          },
-        },
-      },
-    ];
-
-    items = await Clothes.aggregate(pipeline);
+    items = await Clothes.aggregate(
+      buildProductAggregationPipeline({
+        filter: clothesFilter,
+        sort,
+        skip,
+        limit: perPage,
+      })
+    );
   } else {
     throw new Error("Invalid category");
   }
@@ -206,29 +130,9 @@ const fetchProductById = async (productId) => {
     throw new Error("Product not found.");
   }
 
-  const pipeline = [
-    {
-      $lookup: {
-        from: "products",
-        localField: "productId",
-        foreignField: "_id",
-        as: "product",
-      },
-    },
-    { $unwind: "$product" },
-    { $match: { productId: product._id } },
-    {
-      $project: {
-        __v: 0,
-        product: {
-          _id: 0,
-          __v: 0,
-          createdAt: 0,
-          updatedAt: 0,
-        },
-      },
-    },
-  ];
+  const pipeline = buildProductAggregationPipeline({
+    filter: { productId: product._id },
+  });
 
   if (product.category === "BOOK") {
     item = await Book.aggregate(pipeline);

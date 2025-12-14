@@ -1,12 +1,11 @@
-import Order from "../models/orderModel.js";
-import OrderItem from "../models/orderItemModel.js";
-import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 import mongoose from "mongoose";
+import Order from "../models/orderModel.js";
+import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 
-export const fetchUserOrders = async (userId, query) => {
+const fetchAllUserOrders = async (userId, query) => {
   const { page, perPage, skip } = getPaginationParams(query);
 
-  const orders = await Order.aggregate([
+  const items = await Order.aggregate([
     { $match: { userId: new mongoose.Types.ObjectId(userId) } },
     { $sort: { orderedAt: -1 } },
     { $skip: skip },
@@ -16,46 +15,49 @@ export const fetchUserOrders = async (userId, query) => {
         from: "orderitems",
         localField: "_id",
         foreignField: "orderId",
-        as: "items"
-      }
+        as: "items",
+      },
     },
     {
       $project: {
         __v: 0,
         "items.__v": 0,
-      }
-    }
+        "items.orderId": 0,
+      },
+    },
   ]);
 
-  const totalItems = await Order.countDocuments({ userId: new mongoose.Types.ObjectId(userId) });
-  const meta = buildMeta({ totalItems, page, perPage });
+  const totalItems = await Order.countDocuments({
+    userId: new mongoose.Types.ObjectId(userId),
+  });
+  const meta = buildMeta({ totalItems, page, perPage, paginationLimit: 10 });
 
-  return { orders, meta };
+  return { items, meta };
 };
 
-export const fetchOrderById = async (userId, orderId) => {
+const fetchUserOrderById = async (userId, orderId) => {
   const order = await Order.aggregate([
-    { 
-      $match: { 
+    {
+      $match: {
         _id: new mongoose.Types.ObjectId(orderId),
-        userId: new mongoose.Types.ObjectId(userId)
-      }
+        userId: new mongoose.Types.ObjectId(userId),
+      },
     },
     {
       $lookup: {
         from: "orderitems",
         localField: "_id",
         foreignField: "orderId",
-        as: "items"
-      }
+        as: "items",
+      },
     },
     {
       $project: {
         __v: 0,
         "items.__v": 0,
-        "items.orderId": 0
-      }
-    }
+        "items.orderId": 0,
+      },
+    },
   ]);
 
   if (!order.length) {
@@ -64,3 +66,5 @@ export const fetchOrderById = async (userId, orderId) => {
 
   return order[0];
 };
+
+export { fetchAllUserOrders, fetchUserOrderById };

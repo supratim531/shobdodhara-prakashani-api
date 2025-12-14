@@ -9,6 +9,7 @@ import profileRouter from "./routes/profileRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import checkoutRouter from "./routes/checkoutRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
 import { connectDatabase } from "./config/dbConfig.js";
 import { timers, cronScheduler } from "./utils/cronSchedular.js";
 import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
@@ -56,6 +57,7 @@ app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/checkout", checkoutRouter);
+app.use("/api/v1/order", orderRouter);
 app.use(handleGlobalError);
 
 app.get("/", (req, res) => {

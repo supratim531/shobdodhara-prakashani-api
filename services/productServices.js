@@ -73,7 +73,7 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(bookFilter, { depth: null });
 
-    totalItems = await Book.aggregate([
+    items = await Book.aggregate([
       {
         $lookup: {
           from: "products",
@@ -88,7 +88,8 @@ const fetchAllProducts = async (query) => {
 
       // Apply filters on joined data
       { $match: bookFilter },
-    ]).length;
+    ]);
+    totalItems = items.length;
 
     const pipeline = [
       {
@@ -135,7 +136,7 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(clothesFilter, { depth: null });
 
-    totalItems = await Book.aggregate([
+    items = await Book.aggregate([
       {
         $lookup: {
           from: "products",
@@ -150,7 +151,8 @@ const fetchAllProducts = async (query) => {
 
       // Apply filters on joined data
       { $match: clothesFilter },
-    ]).length;
+    ]);
+    totalItems = items.length;
 
     const pipeline = [
       {

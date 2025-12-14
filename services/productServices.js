@@ -43,7 +43,7 @@ const saveProduct = async (productData, categoryData) => {
 };
 
 const fetchAllProducts = async (query) => {
-  let items;
+  let items, totalItems;
   const { page, perPage, skip } = getPaginationParams(query);
 
   if (!query.category) {
@@ -55,6 +55,7 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(productFilter, { depth: null });
 
+    totalItems = await Product.find(productFilter).countDocuments();
     // .sort({ ...sort, score: { $meta: "textScore" } })
     items = await Product.find(productFilter)
       .select("-__v")
@@ -63,6 +64,7 @@ const fetchAllProducts = async (query) => {
       .limit(perPage)
       .lean();
   } else if (query.category.toUpperCase() === "BOOK") {
+    totalItems = await Book.countDocuments();
     const sortKey = BOOK_SORT_MAP[query.sort] ? query.sort : "newest";
     const sort = BOOK_SORT_MAP[sortKey];
     const bookFilter = buildBookFilter(query);
@@ -70,6 +72,23 @@ const fetchAllProducts = async (query) => {
     console.log(sortKey);
     console.log(sort);
     console.dir(bookFilter, { depth: null });
+
+    totalItems = await Book.aggregate([
+      {
+        $lookup: {
+          from: "products",
+          localField: "productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+
+      // Convert array → single object
+      { $unwind: "$product" },
+
+      // Apply filters on joined data
+      { $match: bookFilter },
+    ]).length;
 
     const pipeline = [
       {
@@ -116,6 +135,23 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(clothesFilter, { depth: null });
 
+    totalItems = await Book.aggregate([
+      {
+        $lookup: {
+          from: "products",
+          localField: "productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+
+      // Convert array → single object
+      { $unwind: "$product" },
+
+      // Apply filters on joined data
+      { $match: clothesFilter },
+    ]).length;
+
     const pipeline = [
       {
         $lookup: {
@@ -151,7 +187,7 @@ const fetchAllProducts = async (query) => {
   }
 
   const meta = buildMeta({
-    totalItems: items.length,
+    totalItems,
     page,
     perPage,
     paginationLimit: 10,

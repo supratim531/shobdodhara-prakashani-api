@@ -1,3 +1,4 @@
+import { CREATED } from "../constants/statusCodes.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { processPaymentSuccess } from "../services/paymentServices.js";
@@ -9,7 +10,6 @@ import { processPaymentSuccess } from "../services/paymentServices.js";
  */
 const paymentSuccessController = expressAsyncHandler(async (req, res) => {
   const { paymentId, shippingAddress } = req.body;
-
   const order = await processPaymentSuccess(
     req.user.id,
     paymentId,
@@ -19,7 +19,11 @@ const paymentSuccessController = expressAsyncHandler(async (req, res) => {
   return successResponse(
     res,
     "Payment successful. Order created successfully.",
-    { orderId: order._id, totalPrice: order.totalPrice }
+    {
+      orderId: order._id,
+      totalPrice: order.totalPrice,
+    },
+    CREATED.code
   );
 });
 

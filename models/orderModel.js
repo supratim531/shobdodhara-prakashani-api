@@ -26,8 +26,14 @@ const orderSchema = new mongoose.Schema(
       default: "CONFIRMED",
     },
 
-    // Address snapshot
     shippingAddress: { type: Object, required: true },
+
+    // Shiprocket integration fields
+    shiprocketOrderId: { type: String },
+    awbCode: { type: String },
+    courierCompany: { type: String },
+    trackingUrl: { type: String },
+    shiprocketStatus: { type: String },
 
     orderedAt: {
       type: Date,
@@ -40,6 +46,8 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.index({ userId: 1, orderedAt: -1 });
+orderSchema.index({ shiprocketOrderId: 1 });
+orderSchema.index({ awbCode: 1 });
 
 const Order = mongoose.model("Order", orderSchema);
 

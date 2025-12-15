@@ -2,8 +2,7 @@ name: Deploy to Hostinger VPS
 
 on:
   push:
-    branches:
-      - main # deploy when pushed to main branch
+    branches: [main] # deploy when pushed to main branch
 
 jobs:
   deploy:
@@ -30,8 +29,11 @@ jobs:
           script: |
             cd ${{ secrets.VPS_PROJECT_PATH }}
 
-            echo "→ Pulling latest code"
-            git pull origin main
+            echo "→ Fetching latest code"
+            git fetch origin
+
+            echo "→ Resetting VPS code to match GitHub"
+            git reset --hard origin/main
 
             echo "→ Installing node modules"
             npm install

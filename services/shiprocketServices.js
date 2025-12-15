@@ -151,7 +151,7 @@ const createShiprocketOrder = async (orderId) => {
       }
     );
 
-    console.dir(response, { depth: null });
+    console.dir(response.data, { depth: null });
 
     // Update order with Shiprocket details
     await Order.findByIdAndUpdate(orderId, {

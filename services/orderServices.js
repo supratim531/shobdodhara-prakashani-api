@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import Order from "../models/orderModel.js";
+import OrderItem from "../models/orderItemModel.js";
+import Reservation from "../models/reservationModel.js";
+import { fetchCartItems } from "./cartServices.js";
 import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 
 const fetchAllUserOrders = async (userId, query) => {
@@ -85,4 +88,41 @@ const fetchUserOrderById = async (userId, orderId) => {
   return item[0];
 };
 
-export { fetchAllUserOrders, fetchUserOrderById };
+const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
+  // Fetch cart items
+  const cartItems = await fetchCartItems(userId);
+
+  if (!cartItems.length) {
+    throw new Error("Cart is empty.");
+  }
+
+  // Calculate total price
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+  // Create order
+  const order = await Order.create({
+    userId: new mongoose.Types.ObjectId(userId),
+    paymentId: new mongoose.Types.ObjectId(paymentId),
+    totalPrice,
+    shippingAddress,
+    orderedAt: new Date(),
+  });
+
+  // Create order items
+  const orderItems = cartItems.map((cartItem) => ({
+    orderId: order._id,
+    productId: cartItem.productId,
+    productSnapshot: cartItem.productSnapshot,
+    quantity: cartItem.quantity,
+    pricePerUnit: cartItem.productSnapshot.price,
+    totalPrice: cartItem.totalPrice,
+  }));
+
+  // First store order items in the db and then clear user reservations (payment successful)
+  await OrderItem.insertMany(orderItems);
+  await Reservation.deleteMany({ userId });
+
+  return order;
+};
+
+export { fetchAllUserOrders, fetchUserOrderById, createOrderAfterPayment };

@@ -1,5 +1,6 @@
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
+import { processPaymentSuccess } from "../services/paymentServices.js";
 
 /**
  * @description Dummy payment success handler
@@ -7,12 +8,19 @@ import expressAsyncHandler from "express-async-handler";
  * @access private (role: USER)
  */
 const paymentSuccessController = expressAsyncHandler(async (req, res) => {
-  // TODO: Implement order creation and Shiprocket integration
+  const { paymentId, shippingAddress } = req.body;
 
-  return successResponse(res, "Payment successful. Order will be processed.", {
-    paymentId: req.body.paymentId,
-    userId: req.user.id,
-  });
+  const order = await processPaymentSuccess(
+    req.user.id,
+    paymentId,
+    shippingAddress
+  );
+
+  return successResponse(
+    res,
+    "Payment successful. Order created successfully.",
+    { orderId: order._id, totalPrice: order.totalPrice }
+  );
 });
 
 export { paymentSuccessController };

@@ -56,15 +56,39 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(productFilter, { depth: null });
 
-    totalItems = await Product.find(productFilter).countDocuments();
+    const [result] = await Product.aggregate([
+      { $match: productFilter },
 
-    // .sort({ ...sort, score: { $meta: "textScore" } })
-    items = await Product.find(productFilter)
-      .select("-__v")
-      .sort(sort)
-      .skip(skip)
-      .limit(perPage)
-      .lean();
+      {
+        $facet: {
+          data: [
+            // $sort: { ...sort, score: { $meta: "textScore" } }
+            { $sort: sort || { _id: -1 } },
+            { $skip: skip },
+            { $limit: perPage },
+            {
+              $project: {
+                __v: 0,
+              },
+            },
+          ],
+
+          totalCount: [{ $count: "count" }],
+        },
+      },
+
+      {
+        $addFields: {
+          totalItems: {
+            $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0],
+          },
+        },
+      },
+
+      { $project: { data: 1, totalItems: 1 } },
+    ]);
+    items = result.data;
+    totalItems = result.totalItems;
   } else if (query.category.toUpperCase() === "BOOK") {
     totalItems = await Book.countDocuments();
     const sortKey = BOOK_SORT_MAP[query.sort] ? query.sort : "newest";
@@ -75,11 +99,7 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(bookFilter, { depth: null });
 
-    items = await Book.aggregate(
-      buildProductAggregationPipeline({ filter: bookFilter })
-    );
-    totalItems = items.length;
-    items = await Book.aggregate(
+    const [result] = await Book.aggregate(
       buildProductAggregationPipeline({
         filter: bookFilter,
         sort,
@@ -87,6 +107,8 @@ const fetchAllProducts = async (query) => {
         limit: perPage,
       })
     );
+    items = result?.data || [];
+    totalItems = result?.totalItems || 0;
   } else if (query.category.toUpperCase() === "CLOTHES") {
     const sortKey = CLOTHES_SORT_MAP[query.sort] ? query.sort : "newest";
     const sort = CLOTHES_SORT_MAP[sortKey];
@@ -96,11 +118,7 @@ const fetchAllProducts = async (query) => {
     console.log(sort);
     console.dir(clothesFilter, { depth: null });
 
-    items = await Clothes.aggregate(
-      buildProductAggregationPipeline({ filter: clothesFilter })
-    );
-    totalItems = items.length;
-    items = await Clothes.aggregate(
+    const [result] = await Clothes.aggregate(
       buildProductAggregationPipeline({
         filter: clothesFilter,
         sort,
@@ -108,6 +126,8 @@ const fetchAllProducts = async (query) => {
         limit: perPage,
       })
     );
+    items = result?.data || [];
+    totalItems = result?.totalItems || 0;
   } else {
     throw new Error("Invalid category");
   }
@@ -135,9 +155,11 @@ const fetchProductById = async (productId) => {
   });
 
   if (product.category === "BOOK") {
-    item = await Book.aggregate(pipeline);
+    const [result] = await Book.aggregate(pipeline);
+    item = result.data;
   } else if (product.category === "CLOTHES") {
-    item = await Clothes.aggregate(pipeline);
+    const [result] = await Clothes.aggregate(pipeline);
+    item = result.data;
   } else {
     throw new Error("Invalid category found!");
   }

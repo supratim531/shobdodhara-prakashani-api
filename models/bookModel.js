@@ -35,6 +35,7 @@ const bookSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
       index: true,
     },
 
@@ -42,6 +43,7 @@ const bookSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
       index: true,
     },
 

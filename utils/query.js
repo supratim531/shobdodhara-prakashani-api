@@ -1,5 +1,6 @@
 export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
   const pipeline = [];
+  const dataPipeline = [];
 
   pipeline.push(
     {
@@ -20,23 +21,23 @@ export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
 
   if (sort && Object.keys(sort).length) {
     // $sort: { ...sort, score: { $meta: "textScore" } }
-    pipeline.push({ $sort: sort });
+    dataPipeline.push({ $sort: sort });
   }
 
   if ((skip || limit) && !sort) {
-    pipeline.push({ $sort: { _id: -1 } });
+    dataPipeline.push({ $sort: { _id: -1 } });
   }
 
   if (typeof skip === "number" && skip >= 0) {
-    pipeline.push({ $skip: skip });
+    dataPipeline.push({ $skip: skip });
   }
 
   if (typeof limit === "number" && limit > 0) {
-    pipeline.push({ $limit: limit });
+    dataPipeline.push({ $limit: limit });
   }
 
   // Final projection of the aggregated object
-  pipeline.push({
+  dataPipeline.push({
     $project: {
       __v: 0,
       product: {
@@ -45,6 +46,31 @@ export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
         createdAt: 0,
         updatedAt: 0,
       },
+    },
+  });
+
+  // Facet for data + total count
+  pipeline.push({
+    $facet: {
+      data: dataPipeline,
+      totalCount: [{ $count: "count" }],
+    },
+  });
+
+  // Normalize totalItems
+  pipeline.push({
+    $addFields: {
+      totalItems: {
+        $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0],
+      },
+    },
+  });
+
+  // Final response shape
+  pipeline.push({
+    $project: {
+      data: 1,
+      totalItems: 1,
     },
   });
 

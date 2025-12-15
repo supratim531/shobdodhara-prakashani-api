@@ -64,9 +64,11 @@ export function buildBookFilter(query) {
     filter.genre = { $in: genres };
   }
 
-  // filter for language = { ..., language: "" }
+  // Example: ?language=english,bengali
+  // filter for single or multiple languages = { ..., language: { $in: ["english", "bengali"] } }
   if (query.language) {
-    filter.language = query.language.trim();
+    const languages = query.language.split(",").map((l) => l.trim());
+    filter.language = { $in: languages };
   }
 
   // filter for range of pages = { ..., pages: { $gte, $lte } }

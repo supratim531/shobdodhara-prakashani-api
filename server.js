@@ -2,7 +2,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import cookieParser from "cookie-parser";
-import createAdmin from "./utils/createAdmin.js";
 import authRouter from "./routes/authRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import profileRouter from "./routes/profileRoutes.js";
@@ -11,11 +10,14 @@ import cartRouter from "./routes/cartRoutes.js";
 import checkoutRouter from "./routes/checkoutRoutes.js";
 import paymentRouter from "./routes/paymentRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
+import createAdmin from "./api-utils/createAdmin.js";
 import { connectDatabase } from "./config/dbConfig.js";
-import { timers, cronScheduler } from "./utils/cronSchedular.js";
-import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
-import processExpiredReservations from "./cron-jobs/processExpiredReservations.js";
+import { timers, cronScheduler } from "./api-utils/cronSchedular.js";
 import { handleGlobalError } from "./middlewares/globalErrorHandler.js";
+import initializeShiprocket from "./api-utils/initializeShiprocket.js";
+import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
+import refreshShiprocketToken from "./cron-jobs/refreshShiprocketToken.js";
+import processExpiredReservations from "./cron-jobs/processExpiredReservations.js";
 
 const environment = process.env.NODE_ENV || "development";
 const ENV_PATH =
@@ -47,6 +49,7 @@ const corsOptions = {
 //============================ cron tabs =============================//
 cronScheduler(timers.everyMinute, processInactiveCarts);
 cronScheduler(timers.everyMinute, processExpiredReservations);
+cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 //============================ cron tabs =============================//
 
 app.use(cors(corsOptions));
@@ -76,5 +79,6 @@ app.get("/health", (req, res) => {
 
 app.listen(PORT, () => {
   createAdmin();
+  initializeShiprocket();
   console.log(`Server is running at http://localhost:${PORT}`);
 });

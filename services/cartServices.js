@@ -82,9 +82,14 @@ const saveCartItem = async (userId, productId, quantity) => {
         quantity: newQuantity,
         totalPrice: newTotalPrice,
         productSnapshot: {
+          sku: product.sku,
           title: product.title,
           image: product.bannerImage,
           price: effectivePrice,
+          height: product.height,
+          weight: product.weight,
+          length: product.length,
+          breadth: product.breadth,
         },
       },
       { new: true }
@@ -107,9 +112,14 @@ const saveCartItem = async (userId, productId, quantity) => {
       quantity,
       totalPrice,
       productSnapshot: {
+        sku: product.sku,
         title: product.title,
         image: product.bannerImage,
         price: effectivePrice,
+        height: product.height,
+        weight: product.weight,
+        length: product.length,
+        breadth: product.breadth,
       },
     });
 

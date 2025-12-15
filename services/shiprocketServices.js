@@ -4,16 +4,6 @@ import Order from "../models/orderModel.js";
 let authToken = null;
 let tokenExpiry = null;
 
-// Hardcoded pickup location
-const PICKUP_LOCATION = {
-  name: "Main Warehouse",
-  address: "123 Business Park",
-  city: "New Delhi",
-  state: "Delhi",
-  pincode: "110001",
-  phone: "9876543210",
-};
-
 const shiprocketLogin = async () => {
   try {
     const response = await axios.post(
@@ -111,7 +101,7 @@ const createShiprocketOrder = async (orderId) => {
         .toISOString()
         .slice(0, 16)
         .replace("T", " "),
-      pickup_location: PICKUP_LOCATION.name,
+      pickup_location: "warehouse",
       comment: `Order from Shobdodhara Prakashani`,
       billing_customer_name:
         shippingAddress.recipientName.split(" ")[0] ||
@@ -166,7 +156,7 @@ const createShiprocketOrder = async (orderId) => {
     // Update order with Shiprocket details
     await Order.findByIdAndUpdate(orderId, {
       shiprocketOrderId: response.data.order_id.toString(),
-      shiprocketStatus: "CREATED",
+      shiprocketStatus: response.data.status,
     });
 
     return response.data;

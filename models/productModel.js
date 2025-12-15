@@ -8,6 +8,13 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
+    sku: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+
     title: {
       type: String,
       required: true,
@@ -50,6 +57,31 @@ const productSchema = new mongoose.Schema(
         required: true,
       },
     ],
+
+    // Shipping dimensions and weight
+    height: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    weight: {
+      type: Number,
+      required: true,
+      min: 0.1,
+    },
+
+    length: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    breadth: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
 
     isActive: {
       type: Boolean,

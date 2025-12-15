@@ -14,9 +14,14 @@ const cartItemSchema = new mongoose.Schema({
   },
 
   productSnapshot: {
+    sku: { type: String, required: true },
     title: { type: String, required: true },
     image: { type: String, required: true },
     price: { type: Number, required: true },
+    height: { type: Number, required: true },
+    weight: { type: Number, required: true },
+    length: { type: Number, required: true },
+    breadth: { type: Number, required: true },
   },
 
   quantity: {

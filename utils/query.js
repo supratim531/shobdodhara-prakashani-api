@@ -23,6 +23,10 @@ export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
     pipeline.push({ $sort: sort });
   }
 
+  if ((skip || limit) && !sort) {
+    pipeline.push({ $sort: { _id: -1 } });
+  }
+
   if (typeof skip === "number" && skip >= 0) {
     pipeline.push({ $skip: skip });
   }

@@ -169,4 +169,52 @@ const createShiprocketOrder = async (orderId) => {
   }
 };
 
-export { shiprocketLogin, getValidToken, createShiprocketOrder };
+const assignCourier = async (orderId, shipment_id) => {
+  try {
+    const token = await getValidToken();
+    
+    const order = await Order.findById(orderId);
+    if (!order || !order.shiprocketOrderId) {
+      throw new Error("Order not found or Shiprocket order not created");
+    }
+
+    const response = await axios.post(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/assign/awb`,
+      {
+        shipment_id: shipment_id,
+        courier_id: 683,
+        status: "NEW",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("Courier assignment response:", response.data);
+
+    // Update order with courier assignment details
+    await Order.findByIdAndUpdate(orderId, {
+      awbCode: response.data.awb_code,
+      courierCompany: response.data.courier_name,
+      trackingUrl: response.data.tracking_url,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Courier assignment error:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw new Error(
+      `Courier assignment failed: ${
+        error.response?.data?.message || error.response?.data || error.message
+      }`
+    );
+  }
+};
+
+export { shiprocketLogin, getValidToken, createShiprocketOrder, assignCourier };

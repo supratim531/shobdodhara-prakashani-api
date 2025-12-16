@@ -1,5 +1,5 @@
 import { createOrderAfterPayment } from "./orderServices.js";
-import { createShiprocketOrder } from "./shiprocketServices.js";
+import { createShiprocketOrder, assignCourier } from "./shiprocketServices.js";
 
 const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   // Create order after successful payment
@@ -10,7 +10,10 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   );
 
   // Create Shiprocket order
-  await createShiprocketOrder(order._id);
+  const shiprocketOder = await createShiprocketOrder(order._id);
+
+  // Assign courier for the order
+  await assignCourier(order._id, shiprocketOder.shipment_id);
 
   return order;
 };

@@ -1,9 +1,9 @@
-import { shiprocketLogin } from "../services/shiprocketServices.js";
+import { getValidToken } from "../services/shiprocketServices.js";
 
 const refreshShiprocketToken = async () => {
   try {
-    await shiprocketLogin();
-    console.log("----- Shiprocket token refreshed successfully -----");
+    const authToken = await getValidToken();
+    console.log("----- Shiprocket token refreshed -----", authToken);
   } catch (error) {
     console.error("----- Shiprocket token refresh failed -----", error.message);
   }

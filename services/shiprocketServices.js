@@ -172,8 +172,8 @@ const createShiprocketOrder = async (orderId) => {
 const assignCourier = async (orderId, shipment_id) => {
   try {
     const token = await getValidToken();
-    
     const order = await Order.findById(orderId);
+
     if (!order || !order.shiprocketOrderId) {
       throw new Error("Order not found or Shiprocket order not created");
     }
@@ -207,7 +207,7 @@ const assignCourier = async (orderId, shipment_id) => {
     console.error("Courier assignment error:", {
       status: error.response?.status,
       data: error.response?.data,
-      message: error.message
+      message: error.message,
     });
     throw new Error(
       `Courier assignment failed: ${
@@ -217,4 +217,4 @@ const assignCourier = async (orderId, shipment_id) => {
   }
 };
 
-export { shiprocketLogin, getValidToken, createShiprocketOrder, assignCourier };
+export { getValidToken, createShiprocketOrder, assignCourier };

@@ -7,7 +7,7 @@ import {
 } from "../constants/statusCodes.js";
 
 export const handleGlobalError = (error, req, res, next) => {
-  console.log("Error name:", error.name);
+  console.log("Error occured:", error.name, "->", error.message);
 
   switch (error.name) {
     case "TokenExpiredError":

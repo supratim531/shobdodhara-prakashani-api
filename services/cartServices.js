@@ -277,9 +277,8 @@ const fetchCartSummary = async (userId) => {
 
   // calculate discount based on validity of the coupon
   if (cart.appliedCoupon && cart.appliedCoupon.discountValue) {
-    const couponId = cart.appliedCoupon.couponId;
     const couponDiscount = cart.appliedCoupon.discountValue;
-    const coupon = await fetchCouponByCodeAndValidity(couponId);
+    const coupon = await fetchCouponByCodeAndValidity(cart.appliedCoupon.code);
 
     if (coupon && cartSummary.subtotal >= coupon.minOrderValue) {
       // include the coupon in summary

@@ -1,9 +1,13 @@
 import { redisClient } from "../config/redisConfig.js";
 
+/**
+ * Generate cache key from HTTP request
+ * @param {Object} req - Express request object
+ * @returns {string} Generated cache key
+ */
 const generateCacheKey = (req) => {
   const queryParams = req.query;
   const baseURL = req.path.replace(/^\/+|\/+$/g, "").replace(/\//g, ":");
-
   const sortedQueryParams = Object.keys(queryParams)
     .sort()
     .map((key) => `${key}=${queryParams[key]}`)

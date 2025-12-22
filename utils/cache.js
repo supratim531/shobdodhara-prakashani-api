@@ -7,7 +7,8 @@ import { redisClient } from "../config/redisConfig.js";
  */
 const generateCacheKey = (req) => {
   const queryParams = req.query;
-  const baseURL = req.path.replace(/^\/+|\/+$/g, "").replace(/\//g, ":");
+  const baseURL = req.baseUrl.replace(/^\/+|\/+$/g, "").replace(/\//g, ":");
+
   const sortedQueryParams = Object.keys(queryParams)
     .sort()
     .map((key) => `${key}=${queryParams[key]}`)
@@ -42,7 +43,8 @@ const cacheGet = async (key) => {
  */
 const cacheSet = async (key, data, ttl = 300) => {
   try {
-    await redisClient.setex(key, ttl, JSON.stringify(data));
+    const res = await redisClient.setex(key, ttl, JSON.stringify(data));
+    console.log("cacheSet:", { res });
 
     return true;
   } catch (error) {
@@ -79,4 +81,32 @@ const cacheInvalidate = async (patterns) => {
   }
 };
 
-export { generateCacheKey, cacheGet, cacheSet, cacheInvalidate };
+/**
+ * Higher-order function to wrap service functions with caching
+ * @param {Function} serviceFunction - Original service function to wrap
+ * @param {Object} cacheConfig - Cache configuration object
+ * @param {Function} cacheConfig.keyGenerator - Function to generate cache key from arguments
+ * @param {number} cacheConfig.ttl - Time to live in seconds
+ * @returns {Function} Wrapped function with caching
+ */
+const withCache = (serviceFunction, cacheConfig) => {
+  return async (...args) => {
+    const cacheKey = cacheConfig.keyGenerator();
+    console.log("withCache: cacheKey:", { cacheKey });
+
+    // Try cache first
+    const cached = await cacheGet(cacheKey);
+
+    if (cached) return cached;
+
+    // Execute original function
+    const result = await serviceFunction(...args);
+
+    // Cache the result
+    await cacheSet(cacheKey, result, cacheConfig.ttl);
+
+    return result;
+  };
+};
+
+export { generateCacheKey, cacheGet, cacheSet, cacheInvalidate, withCache };

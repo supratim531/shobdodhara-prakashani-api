@@ -3,6 +3,7 @@ import Clothes from "../models/clothesModel.js";
 import Product from "../models/productModel.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
+import { withCache, generateCacheKey } from "../utils/cache.js";
 import {
   saveProduct,
   fetchAllProducts,
@@ -113,8 +114,13 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
  * @access public
  */
 const fetchAllProductsController = expressAsyncHandler(async (req, res) => {
+  const cachedFetchAllProducts = withCache(fetchAllProducts, {
+    keyGenerator: () => generateCacheKey(req),
+    ttl: 300,
+  });
+
   try {
-    const { items, meta } = await fetchAllProducts(req.query);
+    const { items, meta } = await cachedFetchAllProducts(req.query);
 
     return successResponse(res, "All products fetched", { items, meta });
   } catch (error) {

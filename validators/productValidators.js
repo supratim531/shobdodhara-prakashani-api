@@ -6,6 +6,7 @@ export const validateSaveProductPayload = (payload) => {
       .valid("BOOK", "CLOTHES")
       .required()
       .label("category"),
+    sku: Joi.string().required().label("sku"),
     title: Joi.string().min(3).required().label("title"),
     description: Joi.string().min(10).required().label("description"),
     price: Joi.number().positive().required().label("price"),
@@ -17,6 +18,10 @@ export const validateSaveProductPayload = (payload) => {
       .min(1)
       .required()
       .label("slideImages"),
+    height: Joi.number().min(1).required().label("height"),
+    weight: Joi.number().min(0.1).required().label("weight"),
+    length: Joi.number().min(1).required().label("length"),
+    breadth: Joi.number().min(1).required().label("breadth"),
   });
 
   return saveProductSchema.validate(payload, { abortEarly: false });
@@ -52,6 +57,7 @@ export const validateSaveClothesPayload = (payload) => {
 
 export const validateUpdateProductPayload = (payload) => {
   const updateProductSchema = Joi.object({
+    sku: Joi.string().label("sku"),
     title: Joi.string().min(3).label("title"),
     description: Joi.string().min(10).label("description"),
     price: Joi.number().positive().label("price"),
@@ -62,6 +68,10 @@ export const validateUpdateProductPayload = (payload) => {
       .items(Joi.string().uri())
       .min(1)
       .label("slideImages"),
+    weight: Joi.number().min(0.1).label("weight"),
+    length: Joi.number().min(1).label("length"),
+    breadth: Joi.number().min(1).label("breadth"),
+    height: Joi.number().min(1).label("height"),
     isActive: Joi.boolean().label("isActive"),
   });
 

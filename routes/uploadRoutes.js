@@ -11,7 +11,7 @@ router
   .post(
     handleValidateToken,
     handleRole("ADMIN"),
-    upload.array("images", 10),
+    upload.array("images", 6),
     uploadProductImagesController
   );
 

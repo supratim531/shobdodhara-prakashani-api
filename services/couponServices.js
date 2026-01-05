@@ -1,6 +1,16 @@
 import User from "../models/userModel.js";
 import Coupon from "../models/couponModel.js";
 
+const saveCoupon = async (couponData) => {
+  const coupon = await Coupon.create(couponData);
+
+  return coupon.toJSON();
+};
+
+const fetchAllCoupons = async () => {
+  return await Coupon.find({}).select("-__v").sort({ createdAt: -1 });
+};
+
 const fetchCouponById = async (couponId) => {
   return await Coupon.findById(couponId);
 };
@@ -107,6 +117,8 @@ const removeCouponFromCartAndUser = async (cart, userId) => {
 };
 
 export {
+  saveCoupon,
+  fetchAllCoupons,
   fetchCouponById,
   fetchCouponByCodeAndValidity,
   applyCouponToCartAndUser,

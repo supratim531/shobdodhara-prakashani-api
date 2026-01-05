@@ -1,9 +1,15 @@
-import { CREATED } from "../constants/statusCodes.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { verifyPayment } from "../services/paymentServices.js";
-import { validateVerifyPaymentPayload } from "../validators/paymentValidators.js";
-import { UNPROCESSABLE_ENTITY, BAD_REQUEST } from "../constants/statusCodes.js";
+import { verifyPayment, handleWebhook } from "../services/paymentServices.js";
+import {
+  CREATED,
+  BAD_REQUEST,
+  UNPROCESSABLE_ENTITY,
+} from "../constants/statusCodes.js";
+import {
+  validateVerifyPaymentPayload,
+  validateHandleWebhookPayload,
+} from "../validators/paymentValidators.js";
 
 /**
  * @description Verify payment after Razorpay verification
@@ -57,4 +63,40 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { verifyPaymentController };
+/**
+ * @description Handle Razorpay webhook events
+ * @route POST /api/v1/payment/webhook
+ * @access public
+ */
+const handleWebhookController = expressAsyncHandler(async (req, res) => {
+  const webhookSignature = req.headers["x-razorpay-signature"];
+
+  if (!webhookSignature) {
+    res.status(BAD_REQUEST.code);
+    res.statusMessage = BAD_REQUEST.title;
+    throw new Error("Missing webhook signature");
+  }
+
+  const { value: webhookData, error } = validateHandleWebhookPayload(req.body);
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  try {
+    const result = await handleWebhook(webhookData, webhookSignature);
+
+    return successResponse(res, "Webhook processed successfully", result);
+  } catch (error) {
+    if (error.message.includes("signature")) {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
+export { verifyPaymentController, handleWebhookController };

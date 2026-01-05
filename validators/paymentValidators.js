@@ -18,3 +18,12 @@ export const validateVerifyPaymentPayload = (payload) => {
 
   return verifyPaymentSchema.validate(payload, { abortEarly: false });
 };
+
+export const validateHandleWebhookPayload = (payload) => {
+  const handleWebhookSchema = Joi.object({
+    event: Joi.string().required().label("event"),
+    payload: Joi.object().required().label("payload"),
+  });
+
+  return handleWebhookSchema.validate(payload, { abortEarly: false });
+};

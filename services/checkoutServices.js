@@ -2,6 +2,7 @@ import Product from "../models/productModel.js";
 import Reservation from "../models/reservationModel.js";
 import { fetchCurrentProfile } from "./profileServices.js";
 import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
+import { createRazorpayOrder } from "./paymentServices.js";
 
 const prepareCheckout = async (userId, addressId) => {
   // Validate address
@@ -80,6 +81,12 @@ const prepareCheckout = async (userId, addressId) => {
   const totalAmount =
     cartSummary.subtotal + cartSummary.tax + cartSummary.shipping;
 
+  // Create Razorpay order
+  const razorpayOrder = await createRazorpayOrder(userId, totalAmount, {
+    email: user.email,
+    phone: user.phone,
+  });
+
   // Create payment payload (gateway order). This will be sent to Razorpay order creation API.
   const paymentPayload = {
     gateway: "razorpay",
@@ -90,6 +97,17 @@ const prepareCheckout = async (userId, addressId) => {
       customerId: userId,
       customerEmail: user.email,
       customerPhone: user.phone,
+    },
+
+    // Razorpay frontend integration fields
+    id: razorpayOrder.id,
+    key: process.env.RAZORPAY_KEY_ID,
+    name: "Shobdodhara Prakashani",
+    description: "Order payment for books and merchandise",
+    prefill: {
+      name: user.firstName,
+      email: user.email,
+      contact: user.phone,
     },
   };
 

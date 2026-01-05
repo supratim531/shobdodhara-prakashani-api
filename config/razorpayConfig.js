@@ -7,6 +7,6 @@ export const razorpayClient = new Razorpay({
 
 export const RAZORPAY_CONFIG = {
   currency: "INR",
-  receipt_prefix: "order_rcptid_",
+  receipt_prefix: "order_rcptid",
   webhook_secret: process.env.RAZORPAY_WEBHOOK_SECRET,
 };

@@ -1,11 +1,70 @@
+import Payment from "../models/paymentModel.js";
 import { createOrderAfterPayment } from "./orderServices.js";
+import { razorpayClient, RAZORPAY_CONFIG } from "../config/razorpayConfig.js";
 import { createShiprocketOrder, assignCourier } from "./shiprocketServices.js";
+import crypto from "crypto";
 
-const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
-  // Create order after successful payment
+const createRazorpayOrder = async (userId, totalAmount, userDetails) => {
+  const razorpayOrder = await razorpayClient.orders.create({
+    amount: totalAmount * 100, // Convert to paise
+    currency: RAZORPAY_CONFIG.currency,
+    receipt: `${RAZORPAY_CONFIG.receipt_prefix}_${Date.now()}`,
+    notes: {
+      customerId: userId,
+      customerEmail: userDetails.email,
+      customerPhone: userDetails.phone,
+    },
+  });
+
+  await Payment.create({
+    userId,
+    gatewayOrderId: razorpayOrder.id,
+    amount: totalAmount,
+    currency: RAZORPAY_CONFIG.currency,
+    method: "online",
+  });
+
+  return razorpayOrder;
+};
+
+const processPaymentSuccess = async (
+  userId,
+  razorpayOrderId,
+  razorpayPaymentId,
+  razorpaySignature,
+  shippingAddress
+) => {
+  // Verify Razorpay signature
+  const body = razorpayOrderId + "|" + razorpayPaymentId;
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body.toString())
+    .digest("hex");
+
+  if (expectedSignature !== razorpaySignature) {
+    throw new Error("Payment signature verification failed");
+  }
+
+  const payment = await Payment.findOneAndUpdate(
+    { gatewayOrderId: razorpayOrderId, userId },
+    {
+      $set: {
+        gatewayPaymentId: razorpayPaymentId,
+        status: "CAPTURED",
+        capturedAt: new Date(),
+      },
+    },
+    { new: true }
+  );
+
+  if (!payment) {
+    throw new Error("Payment record not found");
+  }
+
+  // Create order after successful payment verification
   const order = await createOrderAfterPayment(
     userId,
-    paymentId,
+    payment._id,
     shippingAddress
   );
 
@@ -18,4 +77,4 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   return order;
 };
 
-export { processPaymentSuccess };
+export { createRazorpayOrder, processPaymentSuccess };

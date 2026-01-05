@@ -27,7 +27,7 @@ const createRazorpayOrder = async (userId, totalAmount, userDetails) => {
   return razorpayOrder;
 };
 
-const processPaymentSuccess = async (
+const verifyPayment = async (
   userId,
   razorpayOrderId,
   razorpayPaymentId,
@@ -77,4 +77,4 @@ const processPaymentSuccess = async (
   return order;
 };
 
-export { createRazorpayOrder, processPaymentSuccess };
+export { createRazorpayOrder, verifyPayment };

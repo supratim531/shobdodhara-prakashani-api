@@ -55,7 +55,7 @@ const fetchAllCouponsController = expressAsyncHandler(async (req, res) => {
   try {
     const coupons = await fetchAllCoupons();
 
-    return successResponse(res, "All coupons fetched", coupons);
+    return successResponse(res, "All coupons fetched.", coupons);
   } catch (error) {
     res.status(INTERNAL_SERVER_ERROR.code);
     res.statusMessage = INTERNAL_SERVER_ERROR.title;

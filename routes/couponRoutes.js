@@ -4,6 +4,7 @@ import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
   saveCouponController,
   fetchAllCouponsController,
+  fetchCouponByIdController,
   updateCouponController,
 } from "../controllers/couponControllers.js";
 
@@ -16,6 +17,7 @@ router
 
 router
   .route("/:couponId")
+  .get(handleValidateToken, handleRole("ADMIN"), fetchCouponByIdController)
   .patch(handleValidateToken, handleRole("ADMIN"), updateCouponController);
 
 export default router;

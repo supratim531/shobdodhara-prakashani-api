@@ -2,6 +2,7 @@ import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import {
   fetchAllCoupons,
+  fetchCouponById,
   saveCoupon,
   updateCoupon,
 } from "../services/couponServices.js";
@@ -72,6 +73,35 @@ const fetchAllCouponsController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
+ * @description Find a coupon by its id
+ * @route GET /api/v1/coupon/:couponId
+ * @access private (role: ADMIN)
+ */
+const fetchCouponByIdController = expressAsyncHandler(async (req, res) => {
+  try {
+    const coupon = await fetchCouponById(req.params.couponId);
+
+    if (!coupon) {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+      throw new Error("Coupon not found.");
+    }
+
+    return successResponse(res, "Coupon fetched.", coupon);
+  } catch (error) {
+    if (error.message === "Coupon not found.") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(INTERNAL_SERVER_ERROR.code);
+      res.statusMessage = INTERNAL_SERVER_ERROR.title;
+    }
+
+    throw error;
+  }
+});
+
+/**
  * @description Update an existing coupon
  * @route PATCH /api/v1/coupon/:couponId
  * @access private (role: ADMIN)
@@ -109,5 +139,6 @@ const updateCouponController = expressAsyncHandler(async (req, res) => {
 export {
   saveCouponController,
   fetchAllCouponsController,
+  fetchCouponByIdController,
   updateCouponController,
 };

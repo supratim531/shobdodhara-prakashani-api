@@ -15,6 +15,10 @@ const fetchCouponById = async (couponId) => {
   return await Coupon.findById(couponId);
 };
 
+const fetchCouponByCode = async (code) => {
+  return await Coupon.findOne({ code });
+};
+
 const fetchCouponByCodeAndValidity = async (code) => {
   const currentDate = new Date();
 
@@ -24,6 +28,20 @@ const fetchCouponByCodeAndValidity = async (code) => {
     endDate: { $gte: currentDate },
     isActive: true,
   });
+};
+
+const updateCoupon = async (code, updateData) => {
+  const coupon = await Coupon.findOneAndUpdate(
+    { code: code.toUpperCase() },
+    { $set: updateData },
+    { new: true }
+  ).select("-__v");
+
+  if (!coupon) {
+    throw new Error("Coupon not found.");
+  }
+
+  return coupon.toJSON();
 };
 
 const applyCouponToCartAndUser = async (
@@ -120,7 +138,9 @@ export {
   saveCoupon,
   fetchAllCoupons,
   fetchCouponById,
+  fetchCouponByCode,
   fetchCouponByCodeAndValidity,
+  updateCoupon,
   applyCouponToCartAndUser,
   removeCouponFromCartAndUser,
 };

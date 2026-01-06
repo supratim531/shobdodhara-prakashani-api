@@ -1,10 +1,18 @@
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { fetchAllCoupons, saveCoupon } from "../services/couponServices.js";
-import { validateSaveCouponPayload } from "../validators/couponValidators.js";
+import {
+  fetchAllCoupons,
+  saveCoupon,
+  updateCoupon,
+} from "../services/couponServices.js";
+import {
+  validateSaveCouponPayload,
+  validateUpdateCouponPayload,
+} from "../validators/couponValidators.js";
 import {
   CREATED,
   BAD_REQUEST,
+  NOT_FOUND,
   UNPROCESSABLE_ENTITY,
   INTERNAL_SERVER_ERROR,
 } from "../constants/statusCodes.js";
@@ -63,4 +71,39 @@ const fetchAllCouponsController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { saveCouponController, fetchAllCouponsController };
+/**
+ * @description Update an existing coupon
+ * @route PATCH /api/v1/coupon/:code
+ * @access private (role: ADMIN)
+ */
+const updateCouponController = expressAsyncHandler(async (req, res) => {
+  const { value: couponData, error } = validateUpdateCouponPayload(req.body);
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  try {
+    const coupon = await updateCoupon(req.params.code, couponData);
+
+    return successResponse(res, "Coupon updated successfully!", coupon);
+  } catch (error) {
+    if (error.message === "Coupon not found.") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
+export {
+  saveCouponController,
+  fetchAllCouponsController,
+  updateCouponController,
+};

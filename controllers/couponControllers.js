@@ -5,6 +5,7 @@ import {
   fetchCouponById,
   saveCoupon,
   updateCoupon,
+  deleteCoupon,
 } from "../services/couponServices.js";
 import {
   validateSaveCouponPayload,
@@ -107,7 +108,9 @@ const fetchCouponByIdController = expressAsyncHandler(async (req, res) => {
  * @access private (role: ADMIN)
  */
 const updateCouponController = expressAsyncHandler(async (req, res) => {
-  const { value: couponData, error } = validateUpdateCouponPayload(req.body);
+  const { value: updatedCouponData, error } = validateUpdateCouponPayload(
+    req.body
+  );
 
   if (error) {
     res.status(UNPROCESSABLE_ENTITY.code);
@@ -116,7 +119,7 @@ const updateCouponController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    const coupon = await updateCoupon(req.params.couponId, couponData);
+    const coupon = await updateCoupon(req.params.couponId, updatedCouponData);
 
     return successResponse(res, "Coupon updated successfully!", coupon);
   } catch (error) {
@@ -136,9 +139,33 @@ const updateCouponController = expressAsyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @description Delete a coupon by ID
+ * @route DELETE /api/v1/coupon/:couponId
+ * @access private (role: ADMIN)
+ */
+const deleteCouponController = expressAsyncHandler(async (req, res) => {
+  try {
+    const deletedCoupon = await deleteCoupon(req.params.couponId);
+
+    return successResponse(res, "Coupon deleted successfully!", deletedCoupon);
+  } catch (error) {
+    if (error.message === "Coupon not found.") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(INTERNAL_SERVER_ERROR.code);
+      res.statusMessage = INTERNAL_SERVER_ERROR.title;
+    }
+
+    throw error;
+  }
+});
+
 export {
   saveCouponController,
   fetchAllCouponsController,
   fetchCouponByIdController,
   updateCouponController,
+  deleteCouponController,
 };

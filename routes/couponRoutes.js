@@ -6,6 +6,7 @@ import {
   fetchAllCouponsController,
   fetchCouponByIdController,
   updateCouponController,
+  deleteCouponController,
 } from "../controllers/couponControllers.js";
 
 const router = Router();
@@ -18,6 +19,7 @@ router
 router
   .route("/:couponId")
   .get(handleValidateToken, handleRole("ADMIN"), fetchCouponByIdController)
-  .patch(handleValidateToken, handleRole("ADMIN"), updateCouponController);
+  .patch(handleValidateToken, handleRole("ADMIN"), updateCouponController)
+  .delete(handleValidateToken, handleRole("ADMIN"), deleteCouponController);
 
 export default router;

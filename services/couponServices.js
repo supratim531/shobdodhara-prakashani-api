@@ -26,10 +26,10 @@ const fetchCouponByCodeAndValidity = async (code) => {
   });
 };
 
-const updateCoupon = async (couponId, updateData) => {
+const updateCoupon = async (couponId, updatedCouponData) => {
   const coupon = await Coupon.findByIdAndUpdate(
     couponId,
-    { $set: updateData },
+    { $set: updatedCouponData },
     { new: true }
   ).select("-__v");
 
@@ -38,6 +38,16 @@ const updateCoupon = async (couponId, updateData) => {
   }
 
   return coupon.toJSON();
+};
+
+const deleteCoupon = async (couponId) => {
+  const coupon = await Coupon.findByIdAndDelete(couponId);
+
+  if (!coupon) {
+    throw new Error("Coupon not found.");
+  }
+
+  return coupon;
 };
 
 const applyCouponToCartAndUser = async (
@@ -136,6 +146,7 @@ export {
   fetchCouponById,
   fetchCouponByCodeAndValidity,
   updateCoupon,
+  deleteCoupon,
   applyCouponToCartAndUser,
   removeCouponFromCartAndUser,
 };

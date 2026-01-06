@@ -73,7 +73,7 @@ const fetchAllCouponsController = expressAsyncHandler(async (req, res) => {
 
 /**
  * @description Update an existing coupon
- * @route PATCH /api/v1/coupon/:code
+ * @route PATCH /api/v1/coupon/:couponId
  * @access private (role: ADMIN)
  */
 const updateCouponController = expressAsyncHandler(async (req, res) => {
@@ -86,13 +86,17 @@ const updateCouponController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    const coupon = await updateCoupon(req.params.code, couponData);
+    const coupon = await updateCoupon(req.params.couponId, couponData);
 
     return successResponse(res, "Coupon updated successfully!", coupon);
   } catch (error) {
     if (error.message === "Coupon not found.") {
       res.status(NOT_FOUND.code);
       res.statusMessage = NOT_FOUND.title;
+    } else if (error.code === 11000) {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+      throw new Error("Coupon code already exists");
     } else {
       res.status(BAD_REQUEST.code);
       res.statusMessage = BAD_REQUEST.title;

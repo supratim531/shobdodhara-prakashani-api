@@ -15,10 +15,6 @@ const fetchCouponById = async (couponId) => {
   return await Coupon.findById(couponId);
 };
 
-const fetchCouponByCode = async (code) => {
-  return await Coupon.findOne({ code });
-};
-
 const fetchCouponByCodeAndValidity = async (code) => {
   const currentDate = new Date();
 
@@ -30,9 +26,9 @@ const fetchCouponByCodeAndValidity = async (code) => {
   });
 };
 
-const updateCoupon = async (code, updateData) => {
-  const coupon = await Coupon.findOneAndUpdate(
-    { code: code.toUpperCase() },
+const updateCoupon = async (couponId, updateData) => {
+  const coupon = await Coupon.findByIdAndUpdate(
+    couponId,
     { $set: updateData },
     { new: true }
   ).select("-__v");
@@ -138,7 +134,6 @@ export {
   saveCoupon,
   fetchAllCoupons,
   fetchCouponById,
-  fetchCouponByCode,
   fetchCouponByCodeAndValidity,
   updateCoupon,
   applyCouponToCartAndUser,

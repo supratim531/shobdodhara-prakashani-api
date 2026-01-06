@@ -15,7 +15,7 @@ router
   .post(handleValidateToken, handleRole("ADMIN"), saveCouponController);
 
 router
-  .route("/:code")
+  .route("/:couponId")
   .patch(handleValidateToken, handleRole("ADMIN"), updateCouponController);
 
 export default router;

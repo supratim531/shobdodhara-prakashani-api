@@ -29,6 +29,7 @@ export const validateSaveCouponPayload = (payload) => {
 
 export const validateUpdateCouponPayload = (payload) => {
   const updateCouponSchema = Joi.object({
+    code: Joi.string().uppercase().trim().label("code"),
     description: Joi.string().trim().label("description"),
     discountType: Joi.string()
       .valid("FLAT", "PERCENTAGE")

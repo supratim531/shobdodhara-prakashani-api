@@ -63,7 +63,7 @@ const saveCouponController = expressAsyncHandler(async (req, res) => {
  */
 const fetchAllCouponsController = expressAsyncHandler(async (req, res) => {
   try {
-    const coupons = await fetchAllCoupons();
+    const coupons = await fetchAllCoupons(req.query);
 
     return successResponse(res, "All coupons fetched.", coupons);
   } catch (error) {

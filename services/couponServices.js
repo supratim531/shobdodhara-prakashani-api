@@ -7,8 +7,20 @@ const saveCoupon = async (couponData) => {
   return coupon.toJSON();
 };
 
-const fetchAllCoupons = async () => {
-  return await Coupon.find({}).select("-__v").sort({ createdAt: -1 });
+const fetchAllCoupons = async (query) => {
+  if (query.valid === "true") {
+    const currentDate = new Date();
+
+    return await Coupon.find({
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate },
+      isActive: true,
+    })
+      .select("-__v")
+      .sort({ createdAt: -1 });
+  } else {
+    return await Coupon.find().select("-__v").sort({ createdAt: -1 });
+  }
 };
 
 const fetchCouponById = async (couponId) => {

@@ -67,9 +67,9 @@ cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 
 app.use(cors(corsOptions));
 app.use(requestLogger);
-app.use(requestBodyLogger);
 app.use(cookieParser());
 app.use(express.json());
+app.use(requestBodyLogger);
 app.use("/public", express.static("public"));
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/admin", adminRouter);

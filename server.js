@@ -21,11 +21,22 @@ import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
 import refreshShiprocketToken from "./cron-jobs/refreshShiprocketToken.js";
 import processExpiredReservations from "./cron-jobs/processExpiredReservations.js";
 
+import AppLogger from "./utils/logger.js";
+import { initializeErrorLogging } from "./middlewares/errorLogger.js";
+import {
+  requestLogger,
+  requestBodyLogger,
+} from "./middlewares/requestLogger.js";
+
 const environment = process.env.NODE_ENV || "development";
 const ENV_PATH =
   environment === "production" ? "./.env.production" : "./.env.development";
 
 dotenv.config({ path: ENV_PATH, quiet: true });
+
+// Initialize logging system
+initializeErrorLogging();
+AppLogger.info("Logging system initialized", { environment });
 
 connectDatabase();
 
@@ -55,6 +66,8 @@ cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 //============================ cron tabs =============================//
 
 app.use(cors(corsOptions));
+app.use(requestLogger);
+app.use(requestBodyLogger);
 app.use(cookieParser());
 app.use(express.json());
 app.use("/public", express.static("public"));
@@ -69,6 +82,9 @@ app.use("/api/v1/checkout", checkoutRouter);
 app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/order", orderRouter);
 app.use(handleGlobalError);
+
+// Log server initialization
+AppLogger.info("All routes and middlewares configured");
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -85,5 +101,14 @@ app.get("/health", (req, res) => {
 app.listen(PORT, () => {
   createAdmin();
   initializeShiprocket();
+
+  // Log server startup
+  AppLogger.info(`Server started successfully`, {
+    port: PORT,
+    environment,
+    nodeVersion: process.version,
+    timestamp: new Date().toISOString(),
+  });
+
   console.log(`Server is running at http://localhost:${PORT}`);
 });

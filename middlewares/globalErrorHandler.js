@@ -1,4 +1,5 @@
 import { errorResponse } from "../utils/response.js";
+import logger from "../config/loggerConfig.js";
 import {
   BAD_REQUEST,
   UNAUTHORIZED,
@@ -7,6 +8,26 @@ import {
 } from "../constants/statusCodes.js";
 
 export const handleGlobalError = (error, req, res, next) => {
+  // Log error details with context
+  const errorContext = {
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    userAgent: req.get("User-Agent"),
+    userId: req.user?.id || "anonymous",
+    timestamp: new Date().toISOString(),
+    errorName: error.name,
+    errorMessage: error.message,
+    stack: error.stack,
+  };
+
+  // Log to Winston (files + BetterStack)
+  logger.error(
+    `Global Error Handler: ${error.name} - ${error.message}`,
+    errorContext
+  );
+
+  // Keep existing console.log for backward compatibility
   console.log("Error occured:", error.name, "->", error.message);
 
   switch (error.name) {

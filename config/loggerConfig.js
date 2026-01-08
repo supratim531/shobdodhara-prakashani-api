@@ -37,9 +37,9 @@ const getFilenameWithTime = (type) => {
 // All logs transport (info, warn, error, debug)
 const allLogsTransport = new DailyRotateFile({
   dirname: path.join(process.cwd(), "logs", "all"),
-  filename: getFilenameWithTime("log"),
+  filename: getFilenameWithTime("all"),
   datePattern: "YYYY-MM-DD",
-  maxSize: "1k",
+  maxSize: "5m",
   maxFiles: "30d",
   format: logFormat,
   level: "debug",
@@ -52,7 +52,7 @@ const errorLogsTransport = new DailyRotateFile({
   dirname: path.join(process.cwd(), "logs", "errors"),
   filename: getFilenameWithTime("error"),
   datePattern: "YYYY-MM-DD",
-  maxSize: "1k",
+  maxSize: "5m",
   maxFiles: "30d",
   format: logFormat,
   level: "warn",

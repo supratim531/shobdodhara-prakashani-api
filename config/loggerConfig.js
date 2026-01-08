@@ -1,6 +1,13 @@
 import path from "path";
 import winston from "winston";
+import { Logtail } from "@logtail/node";
+import { LogtailTransport } from "@logtail/winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+
+// Create a Logtail client
+const logtail = new Logtail(process.env.BETTERSTACK_SOURCE_TOKEN, {
+  endpoint: process.env.BETTERSTACK_INGESTING_URL,
+});
 
 // Custom format for log messages
 const logFormat = winston.format.combine(
@@ -63,7 +70,12 @@ const consoleTransport = new winston.transports.Console({
 });
 
 // Create base transports array
-const transports = [allLogsTransport, errorLogsTransport, consoleTransport];
+const transports = [
+  allLogsTransport,
+  errorLogsTransport,
+  consoleTransport,
+  new LogtailTransport(logtail),
+];
 
 // Create Winston logger
 const logger = winston.createLogger({

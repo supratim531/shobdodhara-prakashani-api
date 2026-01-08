@@ -100,7 +100,7 @@ const prepareCheckout = async (userId, addressId) => {
     },
 
     // Razorpay frontend integration fields
-    id: razorpayOrder.id,
+    order_id: razorpayOrder.id,
     key: process.env.RAZORPAY_KEY_ID,
     name: "Shobdodhara Prakashani",
     description: "Order payment for books and merchandise",

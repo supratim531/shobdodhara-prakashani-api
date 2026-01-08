@@ -1,6 +1,6 @@
+import path from "path";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import path from "path";
 
 // Custom format for log messages
 const logFormat = winston.format.combine(
@@ -24,31 +24,33 @@ const getFilenameWithTime = (type) => {
   const date = now.toISOString().split("T")[0]; // YYYY-MM-DD
   const time = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS
   // return `${type}_${date}T${time}`;
-  return `${type}_${time}`;
+  return `${type}`;
 };
 
 // All logs transport (info, warn, error, debug)
 const allLogsTransport = new DailyRotateFile({
-  dirname: path.join(process.cwd(), "logs", "all", getCurrentDate()),
+  dirname: path.join(process.cwd(), "logs", "all"),
   filename: getFilenameWithTime("log"),
-  datePattern: null,
-  maxSize: "5m",
+  datePattern: "YYYY-MM-DD",
+  maxSize: "1k",
   maxFiles: "30d",
   format: logFormat,
   level: "debug",
   extension: ".log",
+  zippedArchive: true,
 });
 
 // Error logs transport (error level only)
 const errorLogsTransport = new DailyRotateFile({
-  dirname: path.join(process.cwd(), "logs", "errors", getCurrentDate()),
+  dirname: path.join(process.cwd(), "logs", "errors"),
   filename: getFilenameWithTime("error"),
-  datePattern: null,
-  maxSize: "5m",
+  datePattern: "YYYY-MM-DD",
+  maxSize: "1k",
   maxFiles: "30d",
   format: logFormat,
   level: "warn",
   extension: ".log",
+  zippedArchive: true,
 });
 
 // Console transport for development

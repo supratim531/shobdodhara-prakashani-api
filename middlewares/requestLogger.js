@@ -58,7 +58,7 @@ const requestBodyLogger = (req, res, next) => {
       }
     });
 
-    logger.debug(`Request Body [${req.method} ${req.url}]:`, sanitizedBody);
+    logger.info(`Request Body [${req.method} ${req.url}]:`, sanitizedBody);
   }
   next();
 };

@@ -3,7 +3,17 @@ import logger from "../config/loggerConfig.js";
 
 // Custom Morgan format for detailed request logging
 const morganFormat =
-  ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
+  ':remote-addr - [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
+
+// Add custom token before creating morgan middleware
+morgan.token("real-ip", (req) => {
+  return (
+    req.headers["x-forwarded-for"] ||
+    req.headers["x-real-ip"] ||
+    req.socket.remoteAddress ||
+    req.ip
+  );
+});
 
 // Custom stream to integrate Morgan with Winston
 const morganStream = {

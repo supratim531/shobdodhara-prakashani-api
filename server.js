@@ -65,6 +65,8 @@ cronScheduler(timers.everyMinute, processExpiredReservations);
 cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 //============================ cron tabs =============================//
 
+app.set("trust proxy", true);
+
 app.use(cors(corsOptions));
 app.use(requestLogger);
 app.use(cookieParser());

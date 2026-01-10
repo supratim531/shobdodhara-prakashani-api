@@ -130,4 +130,26 @@ const handleWebhook = async (webhookBody, webhookSignature) => {
   return { success: true, event };
 };
 
-export { createRazorpayOrder, verifyPayment, handleWebhook };
+const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
+  // Create order after successful payment
+  const order = await createOrderAfterPayment(
+    userId,
+    paymentId,
+    shippingAddress
+  );
+
+  // Create Shiprocket order
+  const shiprocketOder = await createShiprocketOrder(order._id);
+
+  // Assign courier for the order
+  await assignCourier(order._id, shiprocketOder.shipment_id);
+
+  return order;
+};
+
+export {
+  createRazorpayOrder,
+  verifyPayment,
+  handleWebhook,
+  processPaymentSuccess,
+};

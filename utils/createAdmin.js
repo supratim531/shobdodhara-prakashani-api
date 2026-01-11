@@ -8,17 +8,13 @@ const ENV_PATH =
 
 dotenv.config({ path: ENV_PATH, quiet: true });
 
-const createAdmin = async () => {
+const createAdmin = async (adminEmail, adminPhone, adminPassword) => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPhone = process.env.ADMIN_PHONE;
-    const adminPassword = process.env.ADMIN_PASS;
     let admin = await User.findOne({ email: adminEmail });
 
     if (!admin) {
       const salt = await bcrypt.genSalt(+process.env.SALT);
       const hashedPassword = await bcrypt.hash(adminPassword, salt);
-
       admin = await User.create({
         firstName: "Young",
         lastName: "Architects",

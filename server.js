@@ -101,7 +101,19 @@ app.get("/health", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  createAdmin();
+  // Create one or multiple admin(s)
+  createAdmin(
+    process.env.PRIMARY_ADMIN_EMAIL,
+    process.env.PRIMARY_ADMIN_PHONE,
+    process.env.PRIMARY_ADMIN_PASS
+  );
+  createAdmin(
+    process.env.SECONDARY_ADMIN_EMAIL,
+    process.env.SECONDARY_ADMIN_PHONE,
+    process.env.SECONDARY_ADMIN_PASS
+  );
+
+  // ShipRocket token creation
   initializeShiprocket();
 
   // Log server startup

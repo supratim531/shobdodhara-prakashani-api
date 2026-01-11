@@ -9,6 +9,7 @@ import {
   fetchAllProducts,
   fetchProductById,
   updateProduct,
+  deleteProduct,
 } from "../services/productServices.js";
 import {
   CREATED,
@@ -230,9 +231,33 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @description Delete an existing product and its category-specific details
+ * @route DELETE /api/v1/product/:productId
+ * @access private (role: ADMIN)
+ */
+const deleteProductController = expressAsyncHandler(async (req, res) => {
+  try {
+    const data = await deleteProduct(req.params.productId);
+
+    return successResponse(res, "Product deleted successfully!", data);
+  } catch (error) {
+    if (error.message === "Product not found.") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
 export {
   saveProductController,
   fetchAllProductsController,
   fetchProductByIdController,
   updateProductController,
+  deleteProductController,
 };

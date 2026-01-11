@@ -209,4 +209,28 @@ const updateProduct = async (
   };
 };
 
-export { saveProduct, fetchAllProducts, fetchProductById, updateProduct };
+const deleteProduct = async (productId) => {
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new Error("Product not found.");
+  }
+
+  if (product.category === "BOOK") {
+    await Book.deleteOne({ productId: product._id });
+  } else if (product.category === "CLOTHES") {
+    await Clothes.deleteOne({ productId: product._id });
+  }
+
+  await Product.findByIdAndDelete(productId);
+
+  return product;
+};
+
+export {
+  saveProduct,
+  fetchAllProducts,
+  fetchProductById,
+  updateProduct,
+  deleteProduct,
+};

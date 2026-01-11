@@ -6,6 +6,7 @@ import {
   fetchAllProductsController,
   fetchProductByIdController,
   updateProductController,
+  deleteProductController,
 } from "../controllers/productControllers.js";
 
 const router = Router();
@@ -18,6 +19,7 @@ router
 router
   .route("/:productId")
   .get(fetchProductByIdController)
-  .patch(handleValidateToken, handleRole("ADMIN"), updateProductController);
+  .patch(handleValidateToken, handleRole("ADMIN"), updateProductController)
+  .delete(handleValidateToken, handleRole("ADMIN"), deleteProductController);
 
 export default router;

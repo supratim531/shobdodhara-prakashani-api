@@ -40,7 +40,7 @@ const storage = multer.diskStorage({
     const fileName = path.basename(file.originalname, extension);
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
 
-    cb(null, `${fileName}-${uniqueSuffix}${extension}`);
+    cb(null, `${encodeURIComponent(fileName)}-${uniqueSuffix}${extension}`);
   },
 });
 

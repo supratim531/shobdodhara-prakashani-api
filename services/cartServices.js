@@ -362,7 +362,7 @@ const removeCouponFromCart = async (userId) => {
 };
 
 const fetchInactiveCarts = async () => {
-  const THRESHOLD = process.env.CART_INACTIVITY_THRESHOLD_MIN * 60 * 1000;
+  const THRESHOLD = +process.env.CART_INACTIVITY_THRESHOLD_MIN * 60 * 1000;
   const cutoffDate = new Date(Date.now() - THRESHOLD);
 
   return await Cart.find({

@@ -6,6 +6,8 @@ export const timers = {
   everyMinute: "* * * * *",
   everyThreeMinute: "*/3 * * * *",
   everyFiveMinute: "*/5 * * * *",
+  everyFifteenMinute: "*/15 * * * *",
+  everyThirtyMinute: "*/30 * * * *",
   everySixHour: "1 */6 * * *",
   everyTweleveHour: "1 */12 * * *",
   everyMidnight: "1 0 * * *",

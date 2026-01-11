@@ -18,6 +18,7 @@ import { timers, cronScheduler } from "./utils/cronSchedular.js";
 import { handleGlobalError } from "./middlewares/globalErrorHandler.js";
 import initializeShiprocket from "./utils/initializeShiprocket.js";
 import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
+import processOrphanedImages from "./cron-jobs/processOrphanedImages.js";
 import refreshShiprocketToken from "./cron-jobs/refreshShiprocketToken.js";
 import processExpiredReservations from "./cron-jobs/processExpiredReservations.js";
 
@@ -62,6 +63,7 @@ const corsOptions = {
 //============================ cron tabs =============================//
 cronScheduler(timers.everyMinute, processInactiveCarts);
 cronScheduler(timers.everyMinute, processExpiredReservations);
+cronScheduler(timers.everyFiveMinute, processOrphanedImages);
 cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 //============================ cron tabs =============================//
 

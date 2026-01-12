@@ -227,10 +227,18 @@ const deleteProduct = async (productId) => {
   return product;
 };
 
+const deleteAllProducts = async () => {
+  await Book.deleteMany({});
+  await Clothes.deleteMany({});
+
+  return await Product.deleteMany({});
+};
+
 export {
   saveProduct,
   fetchAllProducts,
   fetchProductById,
   updateProduct,
   deleteProduct,
+  deleteAllProducts,
 };

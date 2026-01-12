@@ -10,6 +10,7 @@ import {
   fetchProductById,
   updateProduct,
   deleteProduct,
+  deleteAllProducts,
 } from "../services/productServices.js";
 import {
   CREATED,
@@ -254,10 +255,22 @@ const deleteProductController = expressAsyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @description Delete all products and their category-specific details
+ * @route DELETE /api/v1/product
+ * @access private (role: ADMIN)
+ */
+const deleteAllProductsController = expressAsyncHandler(async (req, res) => {
+  const data = await deleteAllProducts();
+
+  return successResponse(res, `${data.deletedCount} products deleted`, data);
+});
+
 export {
   saveProductController,
   fetchAllProductsController,
   fetchProductByIdController,
   updateProductController,
   deleteProductController,
+  deleteAllProductsController,
 };

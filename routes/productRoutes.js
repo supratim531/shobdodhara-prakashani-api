@@ -7,6 +7,7 @@ import {
   fetchProductByIdController,
   updateProductController,
   deleteProductController,
+  deleteAllProductsController,
 } from "../controllers/productControllers.js";
 
 const router = Router();
@@ -14,7 +15,12 @@ const router = Router();
 router
   .route("")
   .get(fetchAllProductsController)
-  .post(handleValidateToken, handleRole("ADMIN"), saveProductController);
+  .post(handleValidateToken, handleRole("ADMIN"), saveProductController)
+  .delete(
+    handleValidateToken,
+    handleRole("ADMIN"),
+    deleteAllProductsController
+  );
 
 router
   .route("/:productId")

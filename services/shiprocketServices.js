@@ -170,7 +170,7 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
   }
 };
 
-const assignCourier = async (orderId, shipment_id) => {
+const assignCourier = async (orderId, shipment_id, orderStatus) => {
   try {
     const token = await getValidToken();
     const order = await Order.findById(orderId);
@@ -183,7 +183,7 @@ const assignCourier = async (orderId, shipment_id) => {
       `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/assign/awb`,
       {
         shipment_id: shipment_id,
-        status: "NEW",
+        status: orderStatus,
       },
       {
         headers: {
@@ -198,8 +198,8 @@ const assignCourier = async (orderId, shipment_id) => {
 
     // Update order with courier assignment details
     await Order.findByIdAndUpdate(orderId, {
-      awbCode: response.data.awb_code,
-      courierCompany: response.data.courier_name,
+      awbCode: response.data.response.data.awb_code,
+      courierCompany: response.data.response.data.courier_name,
     });
 
     return response.data;

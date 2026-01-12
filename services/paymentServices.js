@@ -72,9 +72,13 @@ const verifyPayment = async (
   const shiprocketOder = await createShiprocketOrder(order._id, "Prepaid");
 
   // Assign courier for the order
-  await assignCourier(order._id, shiprocketOder.shipment_id);
+  const assignedCourier = await assignCourier(
+    order._id,
+    shiprocketOder.shipment_id,
+    shiprocketOder.status
+  );
 
-  return order;
+  return { order, assignedCourier };
 };
 
 const handleWebhook = async (webhookBody, webhookSignature) => {
@@ -142,9 +146,13 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   const shiprocketOder = await createShiprocketOrder(order._id, "Prepaid");
 
   // Assign courier for the order
-  await assignCourier(order._id, shiprocketOder.shipment_id);
+  const assignedCourier = await assignCourier(
+    order._id,
+    shiprocketOder.shipment_id,
+    shiprocketOder.status
+  );
 
-  return order;
+  return { order, assignedCourier };
 };
 
 export {

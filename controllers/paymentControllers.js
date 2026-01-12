@@ -34,7 +34,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       shippingAddress,
     } = paymentData;
 
-    const order = await verifyPayment(
+    const data = await verifyPayment(
       req.user.id,
       razorpay_order_id,
       razorpay_payment_id,
@@ -45,10 +45,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
     return successResponse(
       res,
       "Payment successful. Order created successfully.",
-      {
-        orderId: order._id,
-        totalPrice: order.totalPrice,
-      },
+      data,
       CREATED.code
     );
   } catch (error) {
@@ -100,7 +97,7 @@ const handleWebhookController = expressAsyncHandler(async (req, res) => {
 const processPaymentSuccessController = expressAsyncHandler(
   async (req, res) => {
     const { paymentId, shippingAddress } = req.body;
-    const order = await processPaymentSuccess(
+    const data = await processPaymentSuccess(
       req.user.id,
       paymentId,
       shippingAddress
@@ -109,10 +106,7 @@ const processPaymentSuccessController = expressAsyncHandler(
     return successResponse(
       res,
       "Payment successful. Order created successfully.",
-      {
-        orderId: order._id,
-        totalPrice: order.totalPrice,
-      },
+      data,
       CREATED.code
     );
   }

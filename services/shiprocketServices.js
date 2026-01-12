@@ -151,6 +151,7 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
       }
     );
 
+    console.log("Shiprocket create order response:");
     console.dir(response.data, { depth: null });
 
     // Update order with Shiprocket details
@@ -182,6 +183,7 @@ const assignCourier = async (orderId, shipment_id) => {
       `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/assign/awb`,
       {
         shipment_id: shipment_id,
+        status: "NEW",
       },
       {
         headers: {

@@ -69,7 +69,7 @@ const verifyPayment = async (
   );
 
   // Create Shiprocket order
-  const shiprocketOder = await createShiprocketOrder(order._id);
+  const shiprocketOder = await createShiprocketOrder(order._id, "Prepaid");
 
   // Assign courier for the order
   await assignCourier(order._id, shiprocketOder.shipment_id);
@@ -139,7 +139,7 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   );
 
   // Create Shiprocket order
-  const shiprocketOder = await createShiprocketOrder(order._id);
+  const shiprocketOder = await createShiprocketOrder(order._id, "Prepaid");
 
   // Assign courier for the order
   await assignCourier(order._id, shiprocketOder.shipment_id);

@@ -35,7 +35,7 @@ const getValidToken = async () => {
   return authToken;
 };
 
-const createShiprocketOrder = async (orderId) => {
+const createShiprocketOrder = async (orderId, paymentMethod) => {
   try {
     const token = await getValidToken();
 
@@ -128,7 +128,7 @@ const createShiprocketOrder = async (orderId) => {
       shipping_email: "",
       shipping_phone: "",
       order_items: orderItems,
-      payment_method: "Prepaid",
+      payment_method: paymentMethod,
       shipping_charges: 0,
       giftwrap_charges: 0,
       transaction_charges: 0,
@@ -182,8 +182,6 @@ const assignCourier = async (orderId, shipment_id) => {
       `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/assign/awb`,
       {
         shipment_id: shipment_id,
-        courier_id: 683,
-        status: "NEW",
       },
       {
         headers: {

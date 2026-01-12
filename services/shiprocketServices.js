@@ -193,13 +193,13 @@ const assignCourier = async (orderId, shipment_id) => {
       }
     );
 
-    console.log("Courier assignment response:", response.data);
+    console.log("Courier assignment response:");
+    console.dir(response.data, { depth: null });
 
     // Update order with courier assignment details
     await Order.findByIdAndUpdate(orderId, {
       awbCode: response.data.awb_code,
       courierCompany: response.data.courier_name,
-      trackingUrl: response.data.tracking_url,
     });
 
     return response.data;

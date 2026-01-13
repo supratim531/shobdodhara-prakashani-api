@@ -22,3 +22,11 @@ export const validateLoginPayload = (payload) => {
 
   return loginSchema.validate(payload, { abortEarly: false });
 };
+
+export const validateVerificationPayload = (payload) => {
+  const verificationSchema = Joi.object({
+    password: Joi.string().required().label("password"),
+  });
+
+  return verificationSchema.validate(payload, { abortEarly: false });
+};

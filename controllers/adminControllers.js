@@ -1,10 +1,13 @@
 import emailQueue from "../queues/emailQueue.js";
-import { login } from "../services/adminServices.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { SEND_OTP_EMAIL_JOB } from "../constants/jobs.js";
-import { validateLoginPayload } from "../validators/adminValidators.js";
+import { login, verification } from "../services/adminServices.js";
 import { BAD_REQUEST, UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
+import {
+  validateLoginPayload,
+  validateVerificationPayload,
+} from "../validators/adminValidators.js";
 
 /**
  * @description Login for admin only
@@ -54,4 +57,32 @@ const loginController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { loginController };
+/**
+ * @description Account verification for admin only
+ * @route POST /api/v1/admin/verification
+ * @access private (role: ADMIN)
+ */
+const verificationController = expressAsyncHandler(async (req, res) => {
+  const { value: verificationData, error } = validateVerificationPayload(
+    req.body
+  );
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  try {
+    const { password } = verificationData;
+    const data = await verification(req.user.id, password);
+
+    return successResponse(res, "Verification successful.", !!data);
+  } catch (error) {
+    res.status(BAD_REQUEST.code);
+    res.statusMessage = BAD_REQUEST.title;
+    throw error;
+  }
+});
+
+export { loginController, verificationController };

@@ -13,7 +13,17 @@ const login = async (email, phone, password) => {
     return { contact, otp };
   }
 
-  throw new Error("Invalid credentials");
+  throw new Error("Invalid credentials!");
 };
 
-export { login };
+const verification = async (userId, password) => {
+  const user = await User.findById(userId).select("+password");
+
+  if (user !== null && (await bcrypt.compare(password, user.password))) {
+    return user;
+  }
+
+  throw new Error("Invalid credentials!");
+};
+
+export { login, verification };

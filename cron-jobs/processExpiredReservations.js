@@ -17,10 +17,12 @@ const processExpiredReservations = async () => {
       await Product.findByIdAndUpdate(reservation.productId, {
         $inc: { stock: reservation.quantity },
       });
+
       // Remove expired reservation
       await Reservation.findByIdAndDelete(reservation._id);
     })
   );
+
   await Promise.all(tasks);
   console.log(
     `----- ${expiredReservations.length} expired reservation(s) processed -----`

@@ -31,7 +31,7 @@ const reservationSchema = new mongoose.Schema(
 );
 
 reservationSchema.index({ productId: 1, userId: 1 });
-reservationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// reservationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Reservation = mongoose.model("Reservation", reservationSchema);
 

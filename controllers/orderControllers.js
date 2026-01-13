@@ -1,3 +1,4 @@
+import AppLogger from "../utils/logger.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import {
@@ -72,7 +73,6 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
 
     let trackingData = null;
 
-    // Try to get tracking data from Shiprocket
     try {
       if (order.awbCode) {
         // Use AWB code for detailed tracking
@@ -84,8 +84,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
 
       // Update order with fresh tracking data
       if (trackingData) {
-        console.log("trackingData response:");
-        console.dir(trackingData, { depth: null });
+        AppLogger.info("trackingData response:", { trackingData });
         await updateOrderShippingStatus(req.params.orderId, {
           shiprocket_status:
             trackingData.tracking_data.shipment_track[0].current_status.toUpperCase(),
@@ -93,7 +92,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
         });
       }
     } catch (trackingError) {
-      console.log("Shiprocket tracking error:", trackingError.message);
+      AppLogger.error("Shiprocket tracking error:", { trackingError });
       // Continue with existing order data if tracking fails
     }
 

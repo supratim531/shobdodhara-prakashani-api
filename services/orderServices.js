@@ -144,16 +144,19 @@ const updateOrderShippingStatus = async (orderId, trackingData) => {
   if (trackingData.shiprocket_status) {
     const statusMapping = {
       "AWB ASSIGNED": "CONFIRMED",
-      "PICKUP GENERATED": "CONFIRMED",
-      "IN TRANSIT": "PROCESSING",
-      SHIPPED: "SHIPPED",
+      "PICKUP GENERATED": "PROCESSING",
+      "OUT FOR PICKUP": "PROCESSING",
+      "PICKED UP": "SHIPPED",
+      "IN TRANSIT": "IN_TRANSIT",
+      "OUT FOR DELIVERY": "IN_TRANSIT",
       DELIVERED: "DELIVERED",
+      "RTO INITIATED": "CANCELLED",
       CANCELLED: "CANCELLED",
-      RTO: "CANCELLED",
     };
 
     const mappedStatus = statusMapping[trackingData.shiprocket_status];
 
+    // Set application level order status
     if (mappedStatus) {
       updateFields.status = mappedStatus;
     }

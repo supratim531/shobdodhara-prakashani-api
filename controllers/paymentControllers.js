@@ -77,7 +77,6 @@ const handleWebhookController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    AppLogger.info("Processing webhook event", { data: req.body });
     const result = await handleWebhook(req.body, webhookSignature);
 
     return successResponse(res, "Webhook processed.", result);

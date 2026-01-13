@@ -318,6 +318,73 @@ const schedulePickup = async (orderId, shipmentId) => {
   }
 };
 
+const handleWebhook = async (webhookData) => {
+  const { order_id, courier_name, ...rest } = webhookData;
+  const current_status = rest.current_status.toUpperCase();
+
+  // Find order by shiprocketOrderId
+  const order = await Order.findOne({ shiprocketOrderId: order_id });
+
+  if (!order) {
+    AppLogger.warn(`Order not found for shiprocket order ID: ${order_id}`);
+
+    return { success: true, message: "Order not found." };
+  }
+
+  // Check idempotency - avoid processing same status twice
+  if (order.shiprocketStatus === current_status && order.lastStatusUpdate) {
+    AppLogger.warn(
+      `Status ${current_status} already processed for order ${order._id}`
+    );
+
+    return { success: true, message: "Already processed." };
+  }
+
+  // Map Shiprocket status to order status
+  const statusMapping = {
+    "AWB ASSIGNED": "CONFIRMED",
+    "PICKUP GENERATED": "PROCESSING",
+    "OUT FOR PICKUP": "PROCESSING",
+    "PICKED UP": "SHIPPED",
+    "IN TRANSIT": "IN_TRANSIT",
+    "OUT FOR DELIVERY": "IN_TRANSIT",
+    DELIVERED: "DELIVERED",
+    "RTO INITIATED": "CANCELLED",
+    CANCELLED: "CANCELLED",
+  };
+
+  const mappedStatus = statusMapping[current_status];
+  const updateFields = {
+    shiprocketStatus: current_status,
+    lastStatusUpdate: new Date(),
+  };
+
+  // Update order status if mapping exists
+  if (mappedStatus) {
+    updateFields.status = mappedStatus;
+  }
+
+  // Set deliveredAt timestamp if delivered
+  if (current_status === "DELIVERED") {
+    updateFields.deliveredAt = new Date();
+  }
+
+  // Update courier company if not already set
+  if (courier_name && !order.courierCompany) {
+    updateFields.courierCompany = courier_name;
+  }
+
+  await Order.findByIdAndUpdate(order._id, { $set: updateFields });
+  AppLogger.log(`Order ${order._id} updated with status: ${current_status}`);
+
+  return {
+    success: true,
+    orderId: order._id,
+    status: current_status,
+    applicationOrderStatus: mappedStatus,
+  };
+};
+
 export {
   getValidToken,
   createShiprocketOrder,
@@ -325,4 +392,5 @@ export {
   trackShipment,
   getShipmentStatus,
   schedulePickup,
+  handleWebhook,
 };

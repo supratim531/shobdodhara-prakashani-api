@@ -34,6 +34,8 @@ const orderSchema = new mongoose.Schema(
     courierCompany: { type: String },
     trackingUrl: { type: String },
     shiprocketStatus: { type: String },
+    deliveredAt: { type: Date },
+    lastStatusUpdate: { type: Date },
 
     orderedAt: {
       type: Date,

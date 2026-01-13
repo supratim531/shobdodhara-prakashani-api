@@ -1,4 +1,5 @@
 import axios from "axios";
+import AppLogger from "../utils/logger.js";
 import Order from "../models/orderModel.js";
 
 let authToken = null;
@@ -153,6 +154,10 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
 
     console.log("Shiprocket create order response:");
     console.dir(response.data, { depth: null });
+    AppLogger.info(
+      `Shiprocket order created for order ${orderId}`,
+      response.data
+    );
 
     // Update order with Shiprocket details
     await Order.findByIdAndUpdate(orderId, {
@@ -195,6 +200,7 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
 
     console.log("Courier assignment response:");
     console.dir(response.data, { depth: null });
+    AppLogger.info(`Courier assigned for order ${orderId}`, response.data);
 
     // Update order with courier assignment details
     await Order.findByIdAndUpdate(orderId, {
@@ -204,7 +210,7 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
 
     return response.data;
   } catch (error) {
-    console.error("Courier assignment error:", {
+    AppLogger.error("Courier assignment error:", {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
@@ -265,10 +271,58 @@ const getShipmentStatus = async (shiprocketOrderId) => {
   }
 };
 
+const schedulePickup = async (orderId, shipmentId) => {
+  try {
+    const token = await getValidToken();
+    const order = await Order.findById(orderId);
+
+    if (!order || !order.shiprocketOrderId) {
+      throw new Error("Order not found or Shiprocket order not created");
+    }
+
+    const response = await axios.post(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/generate/pickup`,
+      {
+        shipment_id: [shipmentId],
+        status: "retry",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("Schedule pickup response:");
+    console.dir(response.data, { depth: null });
+    AppLogger.info(`Pickup scheduled for order ${orderId}`, response.data);
+
+    // Update order with pickup details
+    // await Order.findByIdAndUpdate(orderId, {
+    //   lastStatusUpdate: new Date(),
+    // });
+
+    return response.data;
+  } catch (error) {
+    AppLogger.error("Pickup scheduling error:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw new Error(
+      `Pickup scheduling failed: ${
+        error.response?.data?.message || error.response?.data || error.message
+      }`
+    );
+  }
+};
+
 export {
   getValidToken,
   createShiprocketOrder,
   assignCourier,
   trackShipment,
   getShipmentStatus,
+  schedulePickup,
 };

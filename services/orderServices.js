@@ -47,8 +47,8 @@ const fetchAllUserOrders = async (userId, query) => {
 
     { $project: { data: 1, totalItems: 1 } },
   ]);
-  items = result?.data || [];
-  totalItems = result?.totalItems || 0;
+  const items = result?.data || [];
+  const totalItems = result?.totalItems || 0;
   const meta = buildMeta({ totalItems, page, perPage, paginationLimit: 10 });
 
   return { items, meta };
@@ -143,8 +143,9 @@ const updateOrderShippingStatus = async (orderId, trackingData) => {
   // Map Shiprocket status to order status
   if (trackingData.shiprocket_status) {
     const statusMapping = {
-      "AWB ASSIGNED": "PROCESSING",
-      PICKUP_GENERATED: "PROCESSING",
+      "AWB ASSIGNED": "CONFIRMED",
+      "PICKUP GENERATED": "CONFIRMED",
+      "IN TRANSIT": "PROCESSING",
       SHIPPED: "SHIPPED",
       DELIVERED: "DELIVERED",
       CANCELLED: "CANCELLED",

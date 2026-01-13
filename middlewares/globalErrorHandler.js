@@ -1,5 +1,5 @@
-import { errorResponse } from "../utils/response.js";
 import logger from "../config/loggerConfig.js";
+import { errorResponse } from "../utils/response.js";
 import {
   BAD_REQUEST,
   UNAUTHORIZED,

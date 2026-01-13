@@ -117,7 +117,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
 
     return successResponse(
       res,
-      "Order tracking information retrieved successfully.",
+      "Order tracking information retrieved.",
       trackingInfo
     );
   } catch (error) {

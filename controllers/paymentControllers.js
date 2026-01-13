@@ -1,3 +1,4 @@
+import AppLogger from "../utils/logger.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { validateVerifyPaymentPayload } from "../validators/paymentValidators.js";
@@ -76,6 +77,7 @@ const handleWebhookController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
+    AppLogger.info("Processing webhook event", { data: req.body });
     const result = await handleWebhook(req.body, webhookSignature);
 
     return successResponse(res, "Webhook processed.", result);

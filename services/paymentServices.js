@@ -73,30 +73,30 @@ const verifyPayment = async (
   );
 
   // Create Shiprocket order
-  // const shiprocketOder = await createShiprocketOrder(order._id, "Prepaid");
+  // const shiprocketOrder = await createShiprocketOrder(order._id, "Prepaid");
 
   // Assign courier for the order
   // const assignedCourier = await assignCourier(
   //   order._id,
-  //   shiprocketOder.shipment_id,
-  //   shiprocketOder.status
+  //   shiprocketOrder.shipment_id,
+  //   shiprocketOrder.status
   // );
 
   return { order };
 };
 
-const handleWebhook = async (webhookBody, webhookSignature) => {
+const handleWebhook = async (webhookData, webhookSignature) => {
   // Verify webhook signature
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
-    .update(JSON.stringify(webhookBody))
+    .update(JSON.stringify(webhookData))
     .digest("hex");
 
   if (expectedSignature !== webhookSignature) {
     throw new Error("Webhook signature verification failed");
   }
 
-  const { event, payload } = webhookBody;
+  const { event, payload } = webhookData;
   const paymentEntity = payload.payment?.entity;
 
   if (!paymentEntity) {
@@ -147,19 +147,19 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   );
 
   // Create Shiprocket order
-  const shiprocketOder = await createShiprocketOrder(order._id, "Prepaid");
+  const shiprocketOrder = await createShiprocketOrder(order._id, "Prepaid");
 
   // Assign courier for the order
   const assignedCourier = await assignCourier(
     order._id,
-    shiprocketOder.shipment_id,
-    shiprocketOder.status
+    shiprocketOrder.shipment_id,
+    shiprocketOrder.status
   );
 
   // Schedule pickup (MOST IMPORTANT)
   const scheduledPickup = await schedulePickup(
     order._id,
-    shiprocketOder.shipment_id
+    shiprocketOrder.shipment_id
   );
 
   return { order, assignedCourier, scheduledPickup };

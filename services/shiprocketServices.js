@@ -217,4 +217,58 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
   }
 };
 
-export { getValidToken, createShiprocketOrder, assignCourier };
+const trackShipment = async (awbCode) => {
+  try {
+    const token = await getValidToken();
+
+    const response = await axios.get(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/track/awb/${awbCode}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      `Shipment tracking failed: ${
+        error.response?.data?.message || error.message
+      }`
+    );
+  }
+};
+
+const getShipmentStatus = async (shiprocketOrderId) => {
+  try {
+    const token = await getValidToken();
+
+    const response = await axios.get(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/orders/show/${shiprocketOrderId}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      `Get shipment status failed: ${
+        error.response?.data?.message || error.message
+      }`
+    );
+  }
+};
+
+export {
+  getValidToken,
+  createShiprocketOrder,
+  assignCourier,
+  trackShipment,
+  getShipmentStatus,
+};

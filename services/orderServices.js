@@ -125,4 +125,60 @@ const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
   return order;
 };
 
-export { fetchAllUserOrders, fetchUserOrderById, createOrderAfterPayment };
+const updateOrderShippingStatus = async (orderId, trackingData) => {
+  const updateFields = {
+    lastStatusUpdate: new Date(),
+  };
+
+  // Update shiprocketStatus if available
+  if (trackingData.shiprocket_status) {
+    updateFields.shiprocketStatus = trackingData.shiprocket_status;
+  }
+
+  // Update trackingUrl if available
+  if (trackingData.tracking_url) {
+    updateFields.trackingUrl = trackingData.tracking_url;
+  }
+
+  // Map Shiprocket status to order status
+  if (trackingData.shiprocket_status) {
+    const statusMapping = {
+      "AWB ASSIGNED": "PROCESSING",
+      PICKUP_GENERATED: "PROCESSING",
+      SHIPPED: "SHIPPED",
+      DELIVERED: "DELIVERED",
+      CANCELLED: "CANCELLED",
+      RTO: "CANCELLED",
+    };
+
+    const mappedStatus = statusMapping[trackingData.shiprocket_status];
+
+    if (mappedStatus) {
+      updateFields.status = mappedStatus;
+    }
+
+    // Set deliveredAt timestamp if delivered
+    if (trackingData.shiprocket_status === "DELIVERED") {
+      updateFields.deliveredAt = new Date();
+    }
+  }
+
+  const updatedOrder = await Order.findByIdAndUpdate(
+    orderId,
+    { $set: updateFields },
+    { new: true }
+  );
+
+  if (!updatedOrder) {
+    throw new Error("Order not found for status update.");
+  }
+
+  return updatedOrder;
+};
+
+export {
+  fetchAllUserOrders,
+  fetchUserOrderById,
+  createOrderAfterPayment,
+  updateOrderShippingStatus,
+};

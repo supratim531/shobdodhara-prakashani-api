@@ -149,8 +149,13 @@ const fetchAllProductsController = expressAsyncHandler(async (req, res) => {
  * @access public
  */
 const fetchProductByIdController = expressAsyncHandler(async (req, res) => {
+  const cachedFetchProductById = withCache(fetchProductById, {
+    keyGenerator: () => generateCacheKey(req),
+    ttl: 300,
+  });
+
   try {
-    const item = await fetchProductById(req.params.productId);
+    const item = await cachedFetchProductById(req.params.productId);
 
     return successResponse(res, "Product fetched.", item);
   } catch (error) {

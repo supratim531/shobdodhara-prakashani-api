@@ -14,7 +14,7 @@ const handleWebhookController = expressAsyncHandler(async (req, res) => {
 
     return successResponse(res, "Webhook processed.", result);
   } catch (error) {
-    AppLogger.error("Webhook processing error:", { error });
+    AppLogger.error("Webhook processing error:", null, { error });
 
     // Always return 200 OK even on errors to prevent retries
     return successResponse(

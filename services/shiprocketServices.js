@@ -210,7 +210,7 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
 
     return response.data;
   } catch (error) {
-    AppLogger.error("Courier assignment error:", {
+    AppLogger.error("Courier assignment error:", null, {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
@@ -305,7 +305,7 @@ const schedulePickup = async (orderId, shipmentId) => {
 
     return response.data;
   } catch (error) {
-    AppLogger.error("Pickup scheduling error:", {
+    AppLogger.error("Pickup scheduling error:", null, {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,

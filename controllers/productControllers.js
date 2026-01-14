@@ -3,7 +3,11 @@ import Clothes from "../models/clothesModel.js";
 import Product from "../models/productModel.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { withCache, generateCacheKey } from "../utils/cache.js";
+import {
+  withCache,
+  generateCacheKey,
+  cacheInvalidate,
+} from "../utils/cache.js";
 import {
   saveProduct,
   fetchAllProducts,
@@ -96,6 +100,7 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
 
   try {
     const data = await saveProduct(productData, categoryData);
+    await cacheInvalidate(["api:v1:product:*"]);
 
     return successResponse(
       res,
@@ -217,6 +222,7 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
       bookId,
       clothesId
     );
+    await cacheInvalidate(["api:v1:product:*"]);
 
     return successResponse(res, "Product updated successfully!", data);
   } catch (error) {
@@ -240,6 +246,7 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
 const deleteProductController = expressAsyncHandler(async (req, res) => {
   try {
     const data = await deleteProduct(req.params.productId);
+    await cacheInvalidate(["api:v1:product:*"]);
 
     return successResponse(res, "Product deleted successfully!", data);
   } catch (error) {
@@ -262,6 +269,7 @@ const deleteProductController = expressAsyncHandler(async (req, res) => {
  */
 const deleteAllProductsController = expressAsyncHandler(async (req, res) => {
   const data = await deleteAllProducts();
+  await cacheInvalidate(["api:v1:product:*"]);
 
   return successResponse(res, `${data.deletedCount} products deleted`, data);
 });

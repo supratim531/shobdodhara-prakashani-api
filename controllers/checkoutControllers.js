@@ -36,16 +36,20 @@ const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
       CREATED.code
     );
   } catch (error) {
+    console.error(error);
+    console.log("Checkout error:");
+    console.dir(error, { depth: null });
+
     if (
-      error.message.includes("not found") ||
-      error.message.includes("empty")
+      error.message?.includes("not found") ||
+      error.message?.includes("empty")
     ) {
       res.status(NOT_FOUND.code);
       res.statusMessage = NOT_FOUND.title;
     } else if (
-      error.message.includes("left") ||
-      error.message.includes("price") ||
-      error.message.includes("available")
+      error.message?.includes("left") ||
+      error.message?.includes("price") ||
+      error.message?.includes("available")
     ) {
       res.status(BAD_REQUEST.code);
       res.statusMessage = BAD_REQUEST.title;

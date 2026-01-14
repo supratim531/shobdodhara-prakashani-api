@@ -210,13 +210,61 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
 
     return response.data;
   } catch (error) {
-    AppLogger.error("Courier assignment error:", null, {
+    AppLogger.error("Courier assignment error:", error, {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
     });
     throw new Error(
       `Courier assignment failed: ${
+        error.response?.data?.message || error.response?.data || error.message
+      }`
+    );
+  }
+};
+
+const schedulePickup = async (orderId, shipmentId) => {
+  try {
+    const token = await getValidToken();
+    const order = await Order.findById(orderId);
+
+    if (!order || !order.shiprocketOrderId) {
+      throw new Error("Order not found or Shiprocket order not created");
+    }
+
+    const response = await axios.post(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/generate/pickup`,
+      {
+        shipment_id: [shipmentId],
+        status: "retry",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("Schedule pickup response:");
+    console.dir(response.data, { depth: null });
+    AppLogger.info(`Pickup scheduled for order ${orderId}`, response.data);
+
+    // Update order with pickup details
+    await Order.findByIdAndUpdate(orderId, {
+      shiprocketStatus: "PICKUP SCHEDULED",
+      lastStatusUpdate: new Date(),
+    });
+
+    return response.data;
+  } catch (error) {
+    AppLogger.error("Pickup scheduling error:", error, {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw new Error(
+      `Pickup scheduling failed: ${
         error.response?.data?.message || error.response?.data || error.message
       }`
     );
@@ -271,55 +319,8 @@ const getShipmentStatus = async (shiprocketOrderId) => {
   }
 };
 
-const schedulePickup = async (orderId, shipmentId) => {
-  try {
-    const token = await getValidToken();
-    const order = await Order.findById(orderId);
-
-    if (!order || !order.shiprocketOrderId) {
-      throw new Error("Order not found or Shiprocket order not created");
-    }
-
-    const response = await axios.post(
-      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/generate/pickup`,
-      {
-        shipment_id: [shipmentId],
-        status: "retry",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    console.log("Schedule pickup response:");
-    console.dir(response.data, { depth: null });
-    AppLogger.info(`Pickup scheduled for order ${orderId}`, response.data);
-
-    // Update order with pickup details
-    // await Order.findByIdAndUpdate(orderId, {
-    //   lastStatusUpdate: new Date(),
-    // });
-
-    return response.data;
-  } catch (error) {
-    AppLogger.error("Pickup scheduling error:", null, {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
-    throw new Error(
-      `Pickup scheduling failed: ${
-        error.response?.data?.message || error.response?.data || error.message
-      }`
-    );
-  }
-};
-
 const handleWebhook = async (webhookData) => {
-  const { order_id, courier_name, ...rest } = webhookData;
+  const { order_id, ...rest } = webhookData;
   const current_status = rest.current_status.toUpperCase();
 
   // Find order by shiprocketOrderId
@@ -332,17 +333,18 @@ const handleWebhook = async (webhookData) => {
   }
 
   // Check idempotency - avoid processing same status twice
-  if (order.shiprocketStatus === current_status && order.lastStatusUpdate) {
-    AppLogger.warn(
-      `Status ${current_status} already processed for order ${order._id}`
-    );
+  // if (order.shiprocketStatus === current_status && order.lastStatusUpdate) {
+  //   AppLogger.warn(
+  //     `Status ${current_status} already processed for order ${order._id}`
+  //   );
 
-    return { success: true, message: "Already processed." };
-  }
+  //   return { success: true, message: "Already processed." };
+  // }
 
   // Map Shiprocket status to order status
   const statusMapping = {
     "AWB ASSIGNED": "CONFIRMED",
+    "PICKUP SCHEDULED": "CONFIRMED",
     "PICKUP GENERATED": "PROCESSING",
     "OUT FOR PICKUP": "PROCESSING",
     "PICKED UP": "SHIPPED",
@@ -367,11 +369,6 @@ const handleWebhook = async (webhookData) => {
   // Set deliveredAt timestamp if delivered
   if (current_status === "DELIVERED") {
     updateFields.deliveredAt = new Date();
-  }
-
-  // Update courier company if not already set
-  if (courier_name && !order.courierCompany) {
-    updateFields.courierCompany = courier_name;
   }
 
   await Order.findByIdAndUpdate(order._id, { $set: updateFields });

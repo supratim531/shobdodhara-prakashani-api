@@ -144,6 +144,7 @@ const updateOrderShippingStatus = async (orderId, trackingData) => {
   if (trackingData.shiprocket_status) {
     const statusMapping = {
       "AWB ASSIGNED": "CONFIRMED",
+      "PICKUP SCHEDULED": "CONFIRMED",
       "PICKUP GENERATED": "PROCESSING",
       "OUT FOR PICKUP": "PROCESSING",
       "PICKED UP": "SHIPPED",

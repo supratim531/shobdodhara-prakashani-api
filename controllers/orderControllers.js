@@ -92,7 +92,9 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
         });
       }
     } catch (trackingError) {
-      AppLogger.error("Shiprocket tracking error:", null, { trackingError });
+      AppLogger.error("Shiprocket tracking error:", trackingError, {
+        trackingError,
+      });
       // Continue with existing order data if tracking fails
     }
 

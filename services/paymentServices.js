@@ -9,8 +9,9 @@ import {
 } from "./shiprocketServices.js";
 
 const createRazorpayOrder = async (userId, totalAmount, userDetails) => {
+  const totalAmountInPaise = +(totalAmount * 100).toFixed(2);
   const razorpayOrder = await razorpayClient.orders.create({
-    amount: totalAmount * 100, // Convert to paise
+    amount: totalAmountInPaise,
     currency: RAZORPAY_CONFIG.currency,
     receipt: `${RAZORPAY_CONFIG.receipt_prefix}_${Date.now()}`,
     notes: {

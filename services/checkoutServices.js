@@ -82,14 +82,10 @@ const prepareCheckout = async (userId, addressId) => {
     cartSummary.subtotal + cartSummary.tax + cartSummary.shipping;
 
   // Create Razorpay order
-  const razorpayOrder = await createRazorpayOrder(
-    userId,
-    totalAmount.toFixed(2),
-    {
-      email: user.email,
-      phone: user.phone,
-    }
-  );
+  const razorpayOrder = await createRazorpayOrder(userId, totalAmount, {
+    email: user.email,
+    phone: user.phone,
+  });
 
   // Create payment payload (gateway order). This will be sent to Razorpay order creation API.
   const paymentPayload = {

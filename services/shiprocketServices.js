@@ -323,10 +323,10 @@ const handleWebhook = async (webhookData) => {
   const current_status = rest.current_status.toUpperCase();
 
   // Find order by shiprocketOrderId
-  const order = await Order.findOne({ shiprocketOrderId: order_id });
+  const order = await Order.findById(order_id);
 
   if (!order) {
-    AppLogger.warn(`Order not found for shiprocket order ID: ${order_id}`);
+    AppLogger.warn(`Order not found for order ID: ${order_id}`);
 
     return { success: true, message: "Order not found." };
   }
@@ -350,7 +350,7 @@ const handleWebhook = async (webhookData) => {
     "OUT FOR DELIVERY": "IN_TRANSIT",
     DELIVERED: "DELIVERED",
     "RTO INITIATED": "CANCELLED",
-    CANCELLED: "CANCELLED",
+    CANCELED: "CANCELLED",
   };
 
   const mappedStatus = statusMapping[current_status];

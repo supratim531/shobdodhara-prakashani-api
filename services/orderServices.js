@@ -151,7 +151,7 @@ const updateOrderShippingStatus = async (orderId, trackingData) => {
       "OUT FOR DELIVERY": "IN_TRANSIT",
       DELIVERED: "DELIVERED",
       "RTO INITIATED": "CANCELLED",
-      CANCELLED: "CANCELLED",
+      CANCELED: "CANCELLED",
     };
 
     const mappedStatus = statusMapping[trackingData.shiprocket_status];

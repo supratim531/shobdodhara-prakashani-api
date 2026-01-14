@@ -7,7 +7,8 @@ import { redisClient } from "../config/redisConfig.js";
  */
 const generateCacheKey = (req) => {
   const queryParams = req.query;
-  const baseURL = req.baseUrl.replace(/^\/+|\/+$/g, "").replace(/\//g, ":");
+  const path = req.baseUrl + req.path;
+  const baseURL = path.replace(/^\/+|\/+$/g, "").replace(/\//g, ":");
 
   const sortedQueryParams = Object.keys(queryParams)
     .sort()

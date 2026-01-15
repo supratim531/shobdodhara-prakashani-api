@@ -38,10 +38,6 @@ const fetchAllUsers = async (query) => {
   return { items, meta };
 };
 
-const deleteUser = async (userId) => {
-  return await User.findByIdAndDelete(userId);
-};
-
 const deactivateUser = async (userId) => {
   return await User.findByIdAndUpdate(
     userId,
@@ -50,4 +46,8 @@ const deactivateUser = async (userId) => {
   );
 };
 
-export { fetchAllUsers, deleteUser, deactivateUser };
+const deleteUser = async (userId) => {
+  return await User.findByIdAndDelete(userId);
+};
+
+export { fetchAllUsers, deactivateUser, deleteUser };

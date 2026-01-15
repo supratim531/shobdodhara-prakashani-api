@@ -2,8 +2,8 @@ import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import {
   fetchAllUsers,
-  deleteUser,
   deactivateUser,
+  deleteUser,
 } from "../services/userServices.js";
 
 /**
@@ -18,6 +18,17 @@ const fetchAllUsersController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
+ * @description Deactivate an user by its id
+ * @route PATCH /api/v1/user/:userId/deactivate
+ * @access private (role: ADMIN)
+ */
+const deactivateUserController = expressAsyncHandler(async (req, res) => {
+  const data = await deactivateUser(req.params.userId);
+
+  return successResponse(res, "User deactivated!", data);
+});
+
+/**
  * @description Delete an user by its id
  * @route DELETE /api/v1/user/:userId
  * @access private (role: ADMIN)
@@ -28,19 +39,8 @@ const deleteUserController = expressAsyncHandler(async (req, res) => {
   return successResponse(res, "User deleted!", data);
 });
 
-/**
- * @description Deactivate an user by its id
- * @route DELETE /api/v1/user/deactivate/:userId
- * @access private (role: ADMIN)
- */
-const deactivateUserController = expressAsyncHandler(async (req, res) => {
-  const data = await deactivateUser(req.params.userId);
-
-  return successResponse(res, "User deactivated!", data);
-});
-
 export {
   fetchAllUsersController,
-  deleteUserController,
   deactivateUserController,
+  deleteUserController,
 };

@@ -372,7 +372,7 @@ const handleWebhook = async (webhookData) => {
   }
 
   await Order.findByIdAndUpdate(order._id, { $set: updateFields });
-  AppLogger.log(`Order ${order._id} updated with status: ${current_status}`);
+  AppLogger.info(`Order ${order._id} updated with status: ${current_status}`);
 
   return {
     success: true,

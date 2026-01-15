@@ -3,8 +3,8 @@ import { handleRole } from "../middlewares/roleHandler.js";
 import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
   fetchAllUsersController,
-  deleteUserController,
   deactivateUserController,
+  deleteUserController,
 } from "../controllers/userControllers.js";
 
 const router = Router();
@@ -14,11 +14,11 @@ router
   .get(handleValidateToken, handleRole("ADMIN"), fetchAllUsersController);
 
 router
-  .route("/:userId")
-  .delete(handleValidateToken, handleRole("ADMIN"), deleteUserController);
+  .route("/:userId/deactivate")
+  .patch(handleValidateToken, handleRole("ADMIN"), deactivateUserController);
 
 router
-  .route("/deactivate/:userId")
-  .delete(handleValidateToken, handleRole("ADMIN"), deactivateUserController);
+  .route("/:userId")
+  .delete(handleValidateToken, handleRole("ADMIN"), deleteUserController);
 
 export default router;

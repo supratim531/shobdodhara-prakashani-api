@@ -323,7 +323,7 @@ const handleWebhook = async (webhookData) => {
   const { order_id, ...rest } = webhookData;
   const current_status = rest.current_status.toUpperCase();
 
-  // Find order by shiprocketOrderId
+  // Find order by database order id
   const order = await Order.findById(order_id);
 
   if (!order) {
@@ -378,7 +378,7 @@ const handleWebhook = async (webhookData) => {
     success: true,
     orderId: order._id,
     status: current_status,
-    applicationOrderStatus: mappedStatus,
+    orderStatus: mappedStatus,
   };
 };
 

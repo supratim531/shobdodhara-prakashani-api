@@ -86,9 +86,11 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
       if (trackingData) {
         AppLogger.info("trackingData response:", { trackingData });
         await updateOrderShippingStatus(req.params.orderId, {
+          tracking_url: trackingData.tracking_data.track_url,
+          track_activities:
+            trackingData.tracking_data.shipment_track_activities,
           shiprocket_status:
             trackingData.tracking_data.shipment_track[0].current_status.toUpperCase(),
-          tracking_url: trackingData.tracking_data.track_url,
         });
       }
     } catch (trackingError) {

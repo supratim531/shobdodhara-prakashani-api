@@ -127,6 +127,7 @@ const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
 
 const updateOrderShippingStatus = async (orderId, trackingData) => {
   const updateFields = {
+    trackActivities: trackingData.track_activities || [],
     lastStatusUpdate: new Date(),
   };
 

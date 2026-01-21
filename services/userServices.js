@@ -1,6 +1,10 @@
 import User from "../models/userModel.js";
 import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 
+const fetchUserById = async (userId) => {
+  return await User.findById(userId).select("-__v").lean();
+};
+
 const fetchAllUsers = async (query) => {
   const { page, perPage, skip } = getPaginationParams(query);
   const [result] = await User.aggregate([
@@ -50,4 +54,4 @@ const deleteUser = async (userId) => {
   return await User.findByIdAndDelete(userId);
 };
 
-export { fetchAllUsers, deactivateUser, deleteUser };
+export { fetchUserById, fetchAllUsers, deactivateUser, deleteUser };

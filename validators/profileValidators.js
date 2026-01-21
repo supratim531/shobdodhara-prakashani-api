@@ -10,6 +10,34 @@ export const validateUpdateProfilePayload = (payload) => {
   return updateProfileSchema.validate(payload, { abortEarly: false });
 };
 
+export const validateInitiateChangeContactPayload = (payload) => {
+  const initiateChangeContactSchema = Joi.object({
+    email: Joi.string().email().label("email"),
+    phone: Joi.string()
+      .pattern(/^[0-9]{10}$/, "valid 10 digit phone number")
+      .messages({
+        "string.pattern.name": "phone must be a valid 10 digit number",
+      })
+      .label("phone"),
+  })
+    .xor("email", "phone")
+    .messages({
+      "object.xor": "Either email or phone must be provided",
+      "object.missing": "Either email or phone must be provided",
+    });
+
+  return initiateChangeContactSchema.validate(payload, { abortEarly: false });
+};
+
+export const validateVerifyChangeContactPayload = (payload) => {
+  const verifyChangeContactSchema = Joi.object({
+    contact: Joi.string().required().label("contact"),
+    otp: Joi.string().length(6).required().label("otp"),
+  });
+
+  return verifyChangeContactSchema.validate(payload, { abortEarly: false });
+};
+
 export const validateSaveAddressPayload = (payload) => {
   const saveAddressSchema = Joi.object({
     recipientName: Joi.string()

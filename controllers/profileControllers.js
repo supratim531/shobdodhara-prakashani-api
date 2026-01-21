@@ -1,13 +1,22 @@
+import emailQueue from "../queues/emailQueue.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
+import { SEND_OTP_EMAIL_JOB } from "../constants/jobs.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken.js";
 import {
   CREATED,
+  BAD_REQUEST,
   NOT_FOUND,
   UNPROCESSABLE_ENTITY,
 } from "../constants/statusCodes.js";
 import {
   fetchCurrentProfile,
   updateProfile,
+  initiateChangeContact,
+  verifyChangeContact,
   saveAddress,
   updateAddress,
   deleteAddress,
@@ -15,6 +24,8 @@ import {
 } from "../services/profileServices.js";
 import {
   validateUpdateProfilePayload,
+  validateInitiateChangeContactPayload,
+  validateVerifyChangeContactPayload,
   validateSaveAddressPayload,
   validateUpdateAddressPayload,
 } from "../validators/profileValidators.js";
@@ -49,6 +60,104 @@ const updateProfileController = expressAsyncHandler(async (req, res) => {
   const updatedUser = await updateProfile(req.user.id, updatedUserData);
 
   return successResponse(res, "Account details updated!", updatedUser);
+});
+
+/**
+ * @description Initiate contact (email or phone) change process
+ * @route POST /api/v1/profile/current/change-contact/initiate
+ * @access private (role: USER, ADMIN)
+ */
+const initiateChangeContactController = expressAsyncHandler(
+  async (req, res) => {
+    const { value: initiateChangeContactData, error } =
+      validateInitiateChangeContactPayload(req.body);
+
+    if (error) {
+      res.status(UNPROCESSABLE_ENTITY.code);
+      res.statusMessage = UNPROCESSABLE_ENTITY.title;
+      throw error;
+    }
+
+    const { email, phone } = initiateChangeContactData;
+    const { contact, otp } = await initiateChangeContact(
+      req.user.id,
+      email,
+      phone
+    );
+
+    if (email) {
+      const mail = {
+        email,
+        subject: "Verify your new email address for Shobdodhara Prakashani",
+        body: `
+          <h1 style="text-align: center;">Confirm your new email address</h1>
+          <p style="text-align: center;">
+            You requested to update the email address linked to your
+            <strong>Shobdodhara Prakashani</strong> account.
+          </p>
+          <p style="text-align: center;">
+            Please use the verification code below to confirm your new email address.
+          </p>
+          <h2 style="text-align: center;">${otp}</h2><br/>
+          <p style="text-align: center;">
+            If you did not request this change, please ignore this email.
+          </p>
+          <p style="text-align: center;">Thank you.</p>
+        `,
+      };
+
+      await emailQueue.add(SEND_OTP_EMAIL_JOB, mail);
+    } else {
+      console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
+    }
+
+    return successResponse(res, `OTP sent successfully at ${email || phone}.`, {
+      contact,
+      otp,
+    });
+  }
+);
+
+/**
+ * @description Verify contact (email or phone) change process
+ * @route POST /api/v1/profile/current/change-contact/verify
+ * @access private (role: USER, ADMIN)
+ */
+const verifyChangeContactController = expressAsyncHandler(async (req, res) => {
+  const { value: verifyChangeContactData, error } =
+    validateVerifyChangeContactPayload(req.body);
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  const { contact, otp } = verifyChangeContactData;
+  const user = await verifyChangeContact(req.user.id, contact, otp);
+
+  if (!user) {
+    res.status(BAD_REQUEST.code);
+    res.statusMessage = BAD_REQUEST.title;
+    throw new Error("Invalid OTP! Please try again.");
+  }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  const environment = process.env.NODE_ENV || "development";
+
+  res.cookie("access-token", accessToken, {
+    httpOnly: true,
+    secure: environment === "production" ? true : false,
+    sameSite: environment === "production" ? "none" : "lax",
+  });
+  res.cookie("refresh-token", refreshToken, {
+    httpOnly: true,
+    secure: environment === "production" ? true : false,
+    sameSite: environment === "production" ? "none" : "lax",
+  });
+
+  return successResponse(res, `Contact updated successfully.`);
 });
 
 /**
@@ -150,6 +259,8 @@ const updateDefaultAddressController = expressAsyncHandler(async (req, res) => {
 export {
   fetchCurrentProfileController,
   updateProfileController,
+  initiateChangeContactController,
+  verifyChangeContactController,
   saveAddressController,
   updateAddressController,
   deleteAddressController,

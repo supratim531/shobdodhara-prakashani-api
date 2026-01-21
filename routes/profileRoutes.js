@@ -4,6 +4,8 @@ import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
   fetchCurrentProfileController,
   updateProfileController,
+  initiateChangeContactController,
+  verifyChangeContactController,
   saveAddressController,
   updateAddressController,
   deleteAddressController,
@@ -23,6 +25,22 @@ router
     handleValidateToken,
     handleRole("USER", "ADMIN"),
     updateProfileController
+  );
+
+router
+  .route("/current/change-contact/initiate")
+  .post(
+    handleValidateToken,
+    handleRole("USER", "ADMIN"),
+    initiateChangeContactController
+  );
+
+router
+  .route("/current/change-contact/verify")
+  .post(
+    handleValidateToken,
+    handleRole("USER", "ADMIN"),
+    verifyChangeContactController
   );
 
 router

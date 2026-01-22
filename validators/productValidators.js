@@ -101,3 +101,15 @@ export const validateUpdateClothesPayload = (payload) => {
 
   return updateClothesSchema.validate(payload, { abortEarly: false });
 };
+
+export const validateDeleteProductsPayload = (payload) => {
+  const deleteProductsSchema = Joi.object({
+    productIds: Joi.array()
+      .items(Joi.string().required())
+      .min(1)
+      .required()
+      .label("productIds"),
+  });
+
+  return deleteProductsSchema.validate(payload, { abortEarly: false });
+};

@@ -15,6 +15,7 @@ import {
   updateProduct,
   deleteProduct,
   deleteAllProducts,
+  deleteProducts,
 } from "../services/productServices.js";
 import {
   CREATED,
@@ -30,6 +31,7 @@ import {
   validateUpdateProductPayload,
   validateUpdateBookPayload,
   validateUpdateClothesPayload,
+  validateDeleteProductsPayload,
 } from "../validators/productValidators.js";
 
 /**
@@ -268,6 +270,44 @@ const deleteProductController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
+ * @description Delete multiple products and their category-specific details
+ * @route POST /api/v1/product/delete
+ * @access private (role: ADMIN)
+ */
+const deleteProductsController = expressAsyncHandler(async (req, res) => {
+  const { value: deleteProductsData, error } = validateDeleteProductsPayload(
+    req.body
+  );
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  try {
+    const result = await deleteProducts(deleteProductsData.productIds);
+    await cacheInvalidate(["api:v1:product*"]);
+
+    return successResponse(
+      res,
+      "Selected products deleted successfully!",
+      result
+    );
+  } catch (error) {
+    if (error.message === "No products found with the provided IDs.") {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
+/**
  * @description Delete all products and their category-specific details
  * @route DELETE /api/v1/product
  * @access private (role: ADMIN)
@@ -285,5 +325,6 @@ export {
   fetchProductByIdController,
   updateProductController,
   deleteProductController,
+  deleteProductsController,
   deleteAllProductsController,
 };

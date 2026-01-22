@@ -227,6 +227,47 @@ const deleteProduct = async (productId) => {
   return product;
 };
 
+const deleteProducts = async (productIds) => {
+  // Find all products to get their categories
+  const products = await Product.find({ _id: { $in: productIds } });
+
+  if (products.length === 0) {
+    throw new Error("No products found with the provided IDs.");
+  }
+
+  // Separate product IDs by category for efficient deletion
+  const bookProductIds = [];
+  const clothesProductIds = [];
+
+  products.forEach((product) => {
+    if (product.category === "BOOK") {
+      bookProductIds.push(product._id);
+    } else if (product.category === "CLOTHES") {
+      clothesProductIds.push(product._id);
+    }
+  });
+
+  // Delete category-specific data and products in parallel
+  await Promise.all([
+    Product.deleteMany({ _id: { $in: productIds } }),
+    ...(bookProductIds.length > 0
+      ? [Book.deleteMany({ productId: { $in: bookProductIds } })]
+      : []),
+    ...(clothesProductIds.length > 0
+      ? [Clothes.deleteMany({ productId: { $in: clothesProductIds } })]
+      : []),
+  ]);
+
+  return {
+    deletedCount: products.length,
+    deletedProducts: products.map((p) => ({
+      id: p._id,
+      title: p.title,
+      category: p.category,
+    })),
+  };
+};
+
 const deleteAllProducts = async () => {
   await Book.deleteMany({});
   await Clothes.deleteMany({});
@@ -240,5 +281,6 @@ export {
   fetchProductById,
   updateProduct,
   deleteProduct,
+  deleteProducts,
   deleteAllProducts,
 };

@@ -17,7 +17,7 @@ const fetchOrSaveActiveCart = async (userId) => {
     cart = await Cart.findByIdAndUpdate(
       cart._id,
       { updatedAt: new Date() },
-      { new: true, timestamps: false }
+      { new: true, timestamps: false },
     ).select("-__v");
   }
 
@@ -92,7 +92,7 @@ const saveCartItem = async (userId, productId, quantity) => {
           breadth: product.breadth,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     const notification = {
@@ -156,7 +156,7 @@ const updateCartItemQuantity = async (userId, itemId, quantity) => {
       quantity: newQuantity,
       totalPrice: newTotalPrice,
     },
-    { new: true }
+    { new: true },
   );
 
   const notification = {
@@ -256,7 +256,6 @@ const fetchCartSummary = async (userId) => {
   const cartSummary = {
     subtotal: 0,
     saved: 0,
-    tax: 0,
     shipping: 0,
     itemCount: 0,
   };
@@ -290,7 +289,6 @@ const fetchCartSummary = async (userId) => {
     }
   }
 
-  cartSummary.tax = cartSummary.subtotal * 0.05;
   cartSummary.shipping = cartSummary.subtotal > 500 ? 0 : 50;
 
   return cartSummary;
@@ -311,7 +309,7 @@ const applyCouponToCart = async (userId, code) => {
 
   if (cart.appliedCoupon.couponId) {
     throw new Error(
-      `Coupon ${cart.appliedCoupon.code} have already applied to the cart.`
+      `Coupon ${cart.appliedCoupon.code} have already applied to the cart.`,
     );
   }
 
@@ -321,7 +319,7 @@ const applyCouponToCart = async (userId, code) => {
 
   if (cartSummary.subtotal < coupon.minOrderValue) {
     throw new Error(
-      `Subtotal must be at least ${coupon.minOrderValue} to apply this coupon`
+      `Subtotal must be at least ${coupon.minOrderValue} to apply this coupon`,
     );
   }
 
@@ -337,7 +335,6 @@ const applyCouponToCart = async (userId, code) => {
 
   cartSummary.saved += couponDiscount;
   cartSummary.subtotal -= couponDiscount;
-  cartSummary.tax = cartSummary.subtotal * 0.05;
   await applyCouponToCartAndUser(coupon, couponDiscount, cart, userId);
 
   return cartSummary;
@@ -355,7 +352,6 @@ const removeCouponFromCart = async (userId) => {
   const cartSummary = await fetchCartSummary(userId);
   cartSummary.saved -= cart.appliedCoupon.discountValue;
   cartSummary.subtotal += cart.appliedCoupon.discountValue;
-  cartSummary.tax = cartSummary.subtotal * 0.05;
   await removeCouponFromCartAndUser(cart, userId);
 
   return cartSummary;
@@ -374,7 +370,7 @@ const fetchInactiveCarts = async () => {
 const markCartsAsAbandoned = async (cartIds) => {
   return await Cart.updateMany(
     { _id: { $in: cartIds } },
-    { $set: { status: "ABANDONED", updatedAt: new Date() } }
+    { $set: { status: "ABANDONED", updatedAt: new Date() } },
   );
 };
 
@@ -390,7 +386,7 @@ const reactivateCart = async (userId) => {
   cart = await Cart.findByIdAndUpdate(
     cart._id,
     { status: "ACTIVE" },
-    { new: true }
+    { new: true },
   ).select("-__v");
   const refreshedCartItems = await refreshCartItems(userId);
 

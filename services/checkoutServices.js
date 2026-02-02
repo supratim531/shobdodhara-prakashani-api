@@ -8,7 +8,7 @@ const prepareCheckout = async (userId, addressId) => {
   // Validate address
   const user = await fetchCurrentProfile(userId);
   const address = user.addresses.find(
-    (address) => address._id.toString() === addressId
+    (address) => address._id.toString() === addressId,
   );
 
   if (!address) {
@@ -39,7 +39,7 @@ const prepareCheckout = async (userId, addressId) => {
     // Stock check
     if (product.stock < item.quantity) {
       throw new Error(
-        `${item.productSnapshot.title} has only ${product.stock} left.`
+        `${item.productSnapshot.title} has only ${product.stock} left.`,
       );
     }
 
@@ -48,7 +48,7 @@ const prepareCheckout = async (userId, addressId) => {
 
     if (effectivePrice !== item.productSnapshot.price) {
       throw new Error(
-        `${item.productSnapshot.title} price has changed. Please refresh cart.`
+        `${item.productSnapshot.title} price has changed. Please refresh cart.`,
       );
     }
 
@@ -76,10 +76,9 @@ const prepareCheckout = async (userId, addressId) => {
     stockVerified: true,
   }));
 
-  // Recalculate final summary: subtotal, coupon, tax & shipping
+  // Recalculate final summary: subtotal, coupon & shipping
   const cartSummary = await fetchCartSummary(userId);
-  const totalAmount =
-    cartSummary.subtotal + cartSummary.tax + cartSummary.shipping;
+  const totalAmount = cartSummary.subtotal + cartSummary.shipping;
 
   // Create Razorpay order
   const razorpayOrder = await createRazorpayOrder(userId, totalAmount, {
@@ -117,7 +116,6 @@ const prepareCheckout = async (userId, addressId) => {
       items,
       subtotal: cartSummary.subtotal,
       saved: cartSummary.saved,
-      tax: cartSummary.tax,
       deliveryFee: cartSummary.shipping,
       totalPayable: totalAmount,
     },

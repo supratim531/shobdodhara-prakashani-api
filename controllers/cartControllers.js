@@ -34,7 +34,7 @@ const fetchOrSaveActiveCartController = expressAsyncHandler(
     const cart = await fetchOrSaveActiveCart(req.user.id);
 
     return successResponse(res, "Cart retrieved successfully.", cart);
-  }
+  },
 );
 
 /**
@@ -67,14 +67,14 @@ const saveCartItemController = expressAsyncHandler(async (req, res) => {
     const { item, notification } = await saveCartItem(
       req.user.id,
       productId,
-      quantity
+      quantity,
     );
 
     return successResponse(
       res,
       "Product added to cart!",
       { item, notification },
-      CREATED.code
+      CREATED.code,
     );
   } catch (error) {
     if (error.message === "Product not found.") {
@@ -97,7 +97,7 @@ const saveCartItemController = expressAsyncHandler(async (req, res) => {
 const updateCartItemQuantityController = expressAsyncHandler(
   async (req, res) => {
     const { value: updateData, error } = validateUpdateCartItemQuantityPayload(
-      req.body
+      req.body,
     );
 
     if (error) {
@@ -112,7 +112,7 @@ const updateCartItemQuantityController = expressAsyncHandler(
       const { item, notification } = await updateCartItemQuantity(
         req.user.id,
         itemId,
-        quantity
+        quantity,
       );
 
       return successResponse(res, "Cart item quantity updated!", {
@@ -130,7 +130,7 @@ const updateCartItemQuantityController = expressAsyncHandler(
 
       throw error;
     }
-  }
+  },
 );
 
 /**
@@ -182,7 +182,7 @@ const refreshCartItemsController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
- * @description Get cart summary including subtotal, discounts, tax estimate, shipping, and item count
+ * @description Get cart summary including subtotal, discounts, shipping, and item count
  * @route GET /api/v1/cart/summary
  * @access private (role: USER)
  */
@@ -204,7 +204,7 @@ const applyCouponToCartController = expressAsyncHandler(async (req, res) => {
   return successResponse(
     res,
     "Coupon applied to the cart.",
-    updatedCartSummary
+    updatedCartSummary,
   );
 });
 
@@ -219,7 +219,7 @@ const removeCouponFromCartController = expressAsyncHandler(async (req, res) => {
   return successResponse(
     res,
     "Coupon removed from the cart.",
-    updatedCartSummary
+    updatedCartSummary,
   );
 });
 

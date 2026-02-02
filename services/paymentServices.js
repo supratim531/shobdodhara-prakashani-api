@@ -37,7 +37,7 @@ const verifyPayment = async (
   razorpayOrderId,
   razorpayPaymentId,
   razorpaySignature,
-  shippingAddress
+  shippingAddress,
 ) => {
   // Verify Razorpay signature
   const body = razorpayOrderId + "|" + razorpayPaymentId;
@@ -59,7 +59,7 @@ const verifyPayment = async (
         capturedAt: new Date(),
       },
     },
-    { new: true }
+    { new: true },
   );
 
   if (!payment) {
@@ -70,7 +70,7 @@ const verifyPayment = async (
   const order = await createOrderAfterPayment(
     userId,
     payment._id,
-    shippingAddress
+    shippingAddress,
   );
 
   // Create Shiprocket order
@@ -81,6 +81,12 @@ const verifyPayment = async (
   //   order._id,
   //   shiprocketOrder.shipment_id,
   //   shiprocketOrder.status
+  // );
+
+  // Schedule pickup (MOST IMPORTANT)
+  // const scheduledPickup = await schedulePickup(
+  //   order._id,
+  //   shiprocketOrder.shipment_id
   // );
 
   return { order };
@@ -115,7 +121,7 @@ const handleWebhook = async (webhookData, webhookSignature) => {
             status: "CAPTURED",
             capturedAt: new Date(),
           },
-        }
+        },
       );
       break;
 
@@ -128,7 +134,7 @@ const handleWebhook = async (webhookData, webhookSignature) => {
             status: "FAILED",
             failureReason: paymentEntity.error_description,
           },
-        }
+        },
       );
       break;
 
@@ -144,7 +150,7 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   const order = await createOrderAfterPayment(
     userId,
     paymentId,
-    shippingAddress
+    shippingAddress,
   );
 
   // Create Shiprocket order
@@ -154,13 +160,13 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   const assignedCourier = await assignCourier(
     order._id,
     shiprocketOrder.shipment_id,
-    shiprocketOrder.status
+    shiprocketOrder.status,
   );
 
   // Schedule pickup (MOST IMPORTANT)
   const scheduledPickup = await schedulePickup(
     order._id,
-    shiprocketOrder.shipment_id
+    shiprocketOrder.shipment_id,
   );
 
   return { order, assignedCourier, scheduledPickup };

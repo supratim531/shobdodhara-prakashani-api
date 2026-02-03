@@ -211,6 +211,9 @@ const checkCourierServiceability = async (
     return {
       recommendedCourierId,
       recommendedCourier,
+      shippingCost: recommendedCourier
+        ? recommendedCourier.freight_charge + 15
+        : 0,
     };
   } catch (error) {
     throw new Error(

@@ -1,9 +1,9 @@
 import Product from "../models/productModel.js";
 import Reservation from "../models/reservationModel.js";
 import { fetchCurrentProfile } from "./profileServices.js";
-import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 import { createRazorpayOrder } from "./paymentServices.js";
 import { checkCourierServiceability } from "./shiprocketServices.js";
+import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 
 const prepareCheckout = async (userId, addressId) => {
   // Validate address
@@ -126,9 +126,8 @@ const prepareCheckout = async (userId, addressId) => {
   };
 };
 
-const checkoutAddress = async (pickupCode, deliveryCode, weight, cod = 0) => {
+const checkoutAddress = async (deliveryCode, weight, cod = 0) => {
   const serviceabilityResult = await checkCourierServiceability(
-    pickupCode,
     deliveryCode,
     weight,
     cod,

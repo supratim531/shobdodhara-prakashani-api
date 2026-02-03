@@ -82,19 +82,10 @@ const checkoutAddressController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    const { pickupCode, deliveryCode, weight, cod } = addressData;
-    const serviceabilityResult = await checkoutAddress(
-      pickupCode,
-      deliveryCode,
-      weight,
-      cod,
-    );
+    const { deliveryCode, weight, cod } = addressData;
+    const result = await checkoutAddress(deliveryCode, weight, cod);
 
-    return successResponse(
-      res,
-      "Courier serviceability checked!",
-      serviceabilityResult,
-    );
+    return successResponse(res, "Courier serviceability checked!", result);
   } catch (error) {
     if (error.message?.includes("serviceability")) {
       res.status(BAD_REQUEST.code);

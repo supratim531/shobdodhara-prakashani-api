@@ -176,7 +176,6 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
 };
 
 const checkCourierServiceability = async (
-  pickupPostcode,
   deliveryPostcode,
   weight,
   cod = 0,
@@ -187,7 +186,7 @@ const checkCourierServiceability = async (
       `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/serviceability`,
       {
         params: {
-          pickup_postcode: pickupPostcode,
+          pickup_postcode: 711201,
           delivery_postcode: deliveryPostcode,
           weight: weight,
           cod: cod,

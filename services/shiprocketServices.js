@@ -12,7 +12,7 @@ const shiprocketLogin = async () => {
       {
         email: process.env.SHIPROCKET_API_USER_EMAIL,
         password: process.env.SHIPROCKET_API_USER_PASS,
-      }
+      },
     );
 
     authToken = response.data.token;
@@ -23,7 +23,7 @@ const shiprocketLogin = async () => {
     throw new Error(
       `Shiprocket login failed: ${
         error.response?.data?.message || error.message
-      }`
+      }`,
     );
   }
 };
@@ -149,14 +149,14 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     console.log("Shiprocket create order response:");
     console.dir(response.data, { depth: null });
     AppLogger.info(
       `Shiprocket order created for order ${orderId}`,
-      response.data
+      response.data,
     );
 
     // Update order with Shiprocket details
@@ -170,7 +170,53 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
     throw new Error(
       `Shiprocket order creation failed: ${
         error.response?.data?.message || error.message
-      }`
+      }`,
+    );
+  }
+};
+
+const checkCourierServiceability = async (
+  pickupPostcode,
+  deliveryPostcode,
+  weight,
+  cod = 0,
+) => {
+  try {
+    const token = await getValidToken();
+    const response = await axios.get(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/serviceability`,
+      {
+        params: {
+          pickup_postcode: pickupPostcode,
+          delivery_postcode: deliveryPostcode,
+          weight: weight,
+          cod: cod,
+        },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    const availableCouriers = response.data.data.available_courier_companies;
+    const recommendedCourierId =
+      response.data.data.recommended_courier_company_id;
+
+    // Find the recommended courier object
+    const recommendedCourier = availableCouriers.find(
+      (courier) => courier.courier_company_id === recommendedCourierId,
+    );
+
+    return {
+      recommendedCourierId,
+      recommendedCourier,
+    };
+  } catch (error) {
+    throw new Error(
+      `Courier serviceability check failed: ${
+        error.response?.data?.message || error.message
+      }`,
     );
   }
 };
@@ -195,7 +241,7 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     console.log("Courier assignment response:");
@@ -218,7 +264,7 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
     throw new Error(
       `Courier assignment failed: ${
         error.response?.data?.message || error.response?.data || error.message
-      }`
+      }`,
     );
   }
 };
@@ -243,7 +289,7 @@ const schedulePickup = async (orderId, shipmentId) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     console.log("Schedule pickup response:");
@@ -266,7 +312,7 @@ const schedulePickup = async (orderId, shipmentId) => {
     throw new Error(
       `Pickup scheduling failed: ${
         error.response?.data?.message || error.response?.data || error.message
-      }`
+      }`,
     );
   }
 };
@@ -274,7 +320,6 @@ const schedulePickup = async (orderId, shipmentId) => {
 const trackShipment = async (awbCode) => {
   try {
     const token = await getValidToken();
-
     const response = await axios.get(
       `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/track/awb/${awbCode}`,
       {
@@ -282,7 +327,7 @@ const trackShipment = async (awbCode) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return response.data;
@@ -290,7 +335,7 @@ const trackShipment = async (awbCode) => {
     throw new Error(
       `Shipment tracking failed: ${
         error.response?.data?.message || error.message
-      }`
+      }`,
     );
   }
 };
@@ -298,7 +343,6 @@ const trackShipment = async (awbCode) => {
 const getShipmentStatus = async (shiprocketOrderId) => {
   try {
     const token = await getValidToken();
-
     const response = await axios.get(
       `${process.env.SHIPROCKET_API_BASE_URL}/external/orders/show/${shiprocketOrderId}`,
       {
@@ -306,7 +350,7 @@ const getShipmentStatus = async (shiprocketOrderId) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return response.data;
@@ -314,7 +358,7 @@ const getShipmentStatus = async (shiprocketOrderId) => {
     throw new Error(
       `Get shipment status failed: ${
         error.response?.data?.message || error.message
-      }`
+      }`,
     );
   }
 };
@@ -385,6 +429,7 @@ const handleWebhook = async (webhookData) => {
 export {
   getValidToken,
   createShiprocketOrder,
+  checkCourierServiceability,
   assignCourier,
   trackShipment,
   getShipmentStatus,

@@ -1,13 +1,19 @@
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import {
+  prepareCheckout,
+  checkoutAddress,
+} from "../services/checkoutServices.js";
+import {
   CREATED,
   BAD_REQUEST,
   NOT_FOUND,
   UNPROCESSABLE_ENTITY,
 } from "../constants/statusCodes.js";
-import { prepareCheckout } from "../services/checkoutServices.js";
-import { validatePrepareCheckoutPayload } from "../validators/checkoutValidators.js";
+import {
+  validatePrepareCheckoutPayload,
+  validateCheckoutAddressPayload,
+} from "../validators/checkoutValidators.js";
 
 /**
  * @description Process checkout and create order
@@ -16,7 +22,7 @@ import { validatePrepareCheckoutPayload } from "../validators/checkoutValidators
  */
 const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
   const { value: checkoutData, error } = validatePrepareCheckoutPayload(
-    req.body
+    req.body,
   );
 
   if (error) {
@@ -33,7 +39,7 @@ const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
       res,
       "Checkout completed successfully!",
       checkoutResult,
-      CREATED.code
+      CREATED.code,
     );
   } catch (error) {
     console.error(error);
@@ -59,4 +65,44 @@ const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
   }
 });
 
-export { prepareCheckoutController };
+/**
+ * @description Check courier serviceability based on the delivery (pincode) address
+ * @route GET /api/v1/checkout/address
+ * @access private (role: USER)
+ */
+const checkoutAddressController = expressAsyncHandler(async (req, res) => {
+  const { value: addressData, error } = validateCheckoutAddressPayload(
+    req.query,
+  );
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  try {
+    const { pickupCode, deliveryCode, weight, cod } = addressData;
+    const serviceabilityResult = await checkoutAddress(
+      pickupCode,
+      deliveryCode,
+      weight,
+      cod,
+    );
+
+    return successResponse(
+      res,
+      "Courier serviceability checked!",
+      serviceabilityResult,
+    );
+  } catch (error) {
+    if (error.message?.includes("serviceability")) {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
+export { prepareCheckoutController, checkoutAddressController };

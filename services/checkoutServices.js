@@ -3,6 +3,7 @@ import Reservation from "../models/reservationModel.js";
 import { fetchCurrentProfile } from "./profileServices.js";
 import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 import { createRazorpayOrder } from "./paymentServices.js";
+import { checkCourierServiceability } from "./shiprocketServices.js";
 
 const prepareCheckout = async (userId, addressId) => {
   // Validate address
@@ -125,4 +126,15 @@ const prepareCheckout = async (userId, addressId) => {
   };
 };
 
-export { prepareCheckout };
+const checkoutAddress = async (pickupCode, deliveryCode, weight, cod = 0) => {
+  const serviceabilityResult = await checkCourierServiceability(
+    pickupCode,
+    deliveryCode,
+    weight,
+    cod,
+  );
+
+  return serviceabilityResult;
+};
+
+export { prepareCheckout, checkoutAddress };

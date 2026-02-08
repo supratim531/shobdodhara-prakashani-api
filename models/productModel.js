@@ -43,8 +43,8 @@ const productSchema = new mongoose.Schema(
 
     stock: {
       type: Number,
-      min: 0,
       required: true,
+      min: 0,
       index: true,
     },
 
@@ -87,8 +87,14 @@ const productSchema = new mongoose.Schema(
 
     totalSales: {
       type: Number,
+      required: true,
       default: 0,
       min: 0,
+    },
+
+    publishedAt: {
+      type: Date,
+      required: true,
     },
 
     isActive: {
@@ -112,6 +118,7 @@ productSchema.index(
 );
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ totalSales: -1 });
+productSchema.index({ publishedAt: -1 });
 productSchema.index({ createdAt: -1 });
 
 productSchema.set("toJSON", { versionKey: false });

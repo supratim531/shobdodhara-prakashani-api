@@ -38,6 +38,7 @@ const verifyPayment = async (
   razorpayPaymentId,
   razorpaySignature,
   shippingAddress,
+  courierId,
 ) => {
   // Verify Razorpay signature
   const body = razorpayOrderId + "|" + razorpayPaymentId;
@@ -73,22 +74,24 @@ const verifyPayment = async (
     shippingAddress,
   );
 
-  // Create Shiprocket order
+  // // Create Shiprocket order
   // const shiprocketOrder = await createShiprocketOrder(order._id, "Prepaid");
 
-  // Assign courier for the order
+  // // Assign courier for the order
   // const assignedCourier = await assignCourier(
   //   order._id,
   //   shiprocketOrder.shipment_id,
-  //   shiprocketOrder.status
+  //   courierId,
+  //   shiprocketOrder.status,
   // );
 
-  // Schedule pickup (MOST IMPORTANT)
+  // // Schedule pickup (MOST IMPORTANT)
   // const scheduledPickup = await schedulePickup(
   //   order._id,
-  //   shiprocketOrder.shipment_id
+  //   shiprocketOrder.shipment_id,
   // );
 
+  // return { order, assignedCourier, scheduledPickup };
   return { order };
 };
 
@@ -145,7 +148,12 @@ const handleWebhook = async (webhookData, webhookSignature) => {
   return { success: true, event };
 };
 
-const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
+const processPaymentSuccess = async (
+  userId,
+  paymentId,
+  shippingAddress,
+  courierId,
+) => {
   // Create order after successful payment
   const order = await createOrderAfterPayment(
     userId,
@@ -160,6 +168,7 @@ const processPaymentSuccess = async (userId, paymentId, shippingAddress) => {
   const assignedCourier = await assignCourier(
     order._id,
     shiprocketOrder.shipment_id,
+    courierId,
     shiprocketOrder.status,
   );
 

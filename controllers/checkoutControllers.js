@@ -86,8 +86,22 @@ const checkoutAddressController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    const { deliveryPostcode, weight, cod } = addressData;
-    const result = await checkoutAddress(deliveryPostcode, weight, cod);
+    const {
+      deliveryPostcode,
+      maxLength,
+      maxBreadth,
+      totalHeight,
+      totalWeight,
+      cod,
+    } = addressData;
+    const result = await checkoutAddress(
+      deliveryPostcode,
+      maxLength,
+      maxBreadth,
+      totalHeight,
+      totalWeight,
+      cod,
+    );
 
     return successResponse(res, "Courier serviceability checked!", result);
   } catch (error) {

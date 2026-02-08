@@ -74,17 +74,17 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
     const shippingAddress = order.shippingAddress;
 
     // Calculate totals and dimensions
-    let totalWeight = 0;
     let maxLength = 0;
     let maxBreadth = 0;
     let totalHeight = 0;
+    let totalWeight = 0;
 
     const orderItems = order.items.map((item) => {
       const snapshot = item.productSnapshot;
-      totalWeight += snapshot.weight * item.quantity;
       maxLength = Math.max(maxLength, snapshot.length);
       maxBreadth = Math.max(maxBreadth, snapshot.breadth);
       totalHeight += snapshot.height * item.quantity;
+      totalWeight += snapshot.weight * item.quantity;
 
       return {
         name: snapshot.title,
@@ -177,7 +177,10 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
 
 const checkCourierServiceability = async (
   deliveryPostcode,
-  weight,
+  maxLength,
+  maxBreadth,
+  totalHeight,
+  totalWeight,
   cod = 0,
 ) => {
   try {
@@ -188,7 +191,10 @@ const checkCourierServiceability = async (
         params: {
           pickup_postcode: 711201,
           delivery_postcode: deliveryPostcode,
-          weight: weight,
+          length: maxLength,
+          breadth: maxBreadth,
+          height: totalHeight,
+          weight: totalWeight,
           cod: cod,
         },
         headers: {
@@ -223,7 +229,7 @@ const checkCourierServiceability = async (
   }
 };
 
-const assignCourier = async (orderId, shipment_id, orderStatus) => {
+const assignCourier = async (orderId, shipmentId, courierId, orderStatus) => {
   try {
     const token = await getValidToken();
     const order = await Order.findById(orderId);
@@ -235,7 +241,8 @@ const assignCourier = async (orderId, shipment_id, orderStatus) => {
     const response = await axios.post(
       `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/assign/awb`,
       {
-        shipment_id: shipment_id,
+        shipment_id: shipmentId,
+        courier_id: courierId,
         status: orderStatus,
       },
       {

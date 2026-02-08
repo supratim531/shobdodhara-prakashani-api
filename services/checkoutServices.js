@@ -6,8 +6,9 @@ import { checkCourierServiceability } from "./shiprocketServices.js";
 import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 
 const prepareCheckout = async (userId, addressId, shippingCost) => {
-  // Validate address
   const user = await fetchCurrentProfile(userId);
+
+  // Validate address
   const address = user.addresses.find(
     (address) => address._id.toString() === addressId,
   );
@@ -126,10 +127,20 @@ const prepareCheckout = async (userId, addressId, shippingCost) => {
   };
 };
 
-const checkoutAddress = async (deliveryPostcode, weight, cod = 0) => {
+const checkoutAddress = async (
+  deliveryPostcode,
+  maxLength,
+  maxBreadth,
+  totalHeight,
+  totalWeight,
+  cod = 0,
+) => {
   const serviceabilityResult = await checkCourierServiceability(
     deliveryPostcode,
-    weight,
+    maxLength,
+    maxBreadth,
+    totalHeight,
+    totalWeight,
     cod,
   );
 

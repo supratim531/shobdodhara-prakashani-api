@@ -32,6 +32,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       shippingAddress,
+      courierId,
     } = paymentData;
 
     const data = await verifyPayment(
@@ -40,6 +41,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       shippingAddress,
+      courierId,
     );
 
     return successResponse(
@@ -96,11 +98,12 @@ const handleWebhookController = expressAsyncHandler(async (req, res) => {
  */
 const processPaymentSuccessController = expressAsyncHandler(
   async (req, res) => {
-    const { paymentId, shippingAddress } = req.body;
+    const { paymentId, shippingAddress, courierId } = req.body;
     const data = await processPaymentSuccess(
       req.user.id,
       paymentId,
       shippingAddress,
+      courierId,
     );
 
     return successResponse(

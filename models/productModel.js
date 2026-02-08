@@ -61,10 +61,22 @@ const productSchema = new mongoose.Schema(
     ],
 
     // Shipping dimensions and weight
+    length: {
+      type: Number,
+      required: true,
+      min: 0.6,
+    },
+
+    breadth: {
+      type: Number,
+      required: true,
+      min: 0.6,
+    },
+
     height: {
       type: Number,
       required: true,
-      min: 1,
+      min: 0.6,
     },
 
     weight: {
@@ -73,23 +85,10 @@ const productSchema = new mongoose.Schema(
       min: 0.1,
     },
 
-    length: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-
-    breadth: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-
     totalSales: {
       type: Number,
       default: 0,
       min: 0,
-      index: true,
     },
 
     isActive: {
@@ -112,6 +111,7 @@ productSchema.index(
   { partialFilterExpression: { isActive: true } },
 );
 productSchema.index({ category: 1, price: 1 });
+productSchema.index({ totalSales: -1 });
 productSchema.index({ createdAt: -1 });
 
 productSchema.set("toJSON", { versionKey: false });

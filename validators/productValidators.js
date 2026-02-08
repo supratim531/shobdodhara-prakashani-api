@@ -18,10 +18,10 @@ export const validateSaveProductPayload = (payload) => {
       .min(1)
       .required()
       .label("slideImages"),
-    height: Joi.number().min(1).required().label("height"),
+    length: Joi.number().min(0.6).required().label("length"),
+    breadth: Joi.number().min(0.6).required().label("breadth"),
+    height: Joi.number().min(0.6).required().label("height"),
     weight: Joi.number().min(0.1).required().label("weight"),
-    length: Joi.number().min(1).required().label("length"),
-    breadth: Joi.number().min(1).required().label("breadth"),
   });
 
   return saveProductSchema.validate(payload, { abortEarly: false });
@@ -65,10 +65,10 @@ export const validateUpdateProductPayload = (payload) => {
     stock: Joi.number().min(0).label("stock"),
     bannerImage: Joi.string().label("bannerImage"),
     slideImages: Joi.array().items(Joi.string()).min(1).label("slideImages"),
+    length: Joi.number().min(0.6).label("length"),
+    breadth: Joi.number().min(0.6).label("breadth"),
+    height: Joi.number().min(0.6).label("height"),
     weight: Joi.number().min(0.1).label("weight"),
-    length: Joi.number().min(1).label("length"),
-    breadth: Joi.number().min(1).label("breadth"),
-    height: Joi.number().min(1).label("height"),
     isActive: Joi.boolean().label("isActive"),
   });
 

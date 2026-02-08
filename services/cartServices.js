@@ -256,7 +256,6 @@ const fetchCartSummary = async (userId) => {
   const cartSummary = {
     subtotal: 0,
     saved: 0,
-    shipping: 0,
     itemCount: 0,
   };
 

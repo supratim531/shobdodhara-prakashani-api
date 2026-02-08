@@ -1,4 +1,3 @@
-import AppLogger from "../utils/logger.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { validateVerifyPaymentPayload } from "../validators/paymentValidators.js";
@@ -40,14 +39,14 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      shippingAddress
+      shippingAddress,
     );
 
     return successResponse(
       res,
       "Payment successful. Order created successfully.",
       data,
-      CREATED.code
+      CREATED.code,
     );
   } catch (error) {
     if (
@@ -101,16 +100,16 @@ const processPaymentSuccessController = expressAsyncHandler(
     const data = await processPaymentSuccess(
       req.user.id,
       paymentId,
-      shippingAddress
+      shippingAddress,
     );
 
     return successResponse(
       res,
       "Payment successful. Order created successfully.",
       data,
-      CREATED.code
+      CREATED.code,
     );
-  }
+  },
 );
 
 export {

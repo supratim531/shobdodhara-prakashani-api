@@ -182,7 +182,7 @@ const refreshCartItemsController = expressAsyncHandler(async (req, res) => {
 });
 
 /**
- * @description Get cart summary including subtotal, discounts, shipping, and item count
+ * @description Get cart summary including subtotal, discounts and item count
  * @route GET /api/v1/cart/summary
  * @access private (role: USER)
  */

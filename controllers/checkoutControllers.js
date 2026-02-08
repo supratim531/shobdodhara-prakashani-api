@@ -32,8 +32,12 @@ const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    const { addressId } = checkoutData;
-    const checkoutResult = await prepareCheckout(req.user.id, addressId);
+    const { addressId, shippingCost } = checkoutData;
+    const checkoutResult = await prepareCheckout(
+      req.user.id,
+      addressId,
+      shippingCost,
+    );
 
     return successResponse(
       res,
@@ -82,8 +86,8 @@ const checkoutAddressController = expressAsyncHandler(async (req, res) => {
   }
 
   try {
-    const { deliveryCode, weight, cod } = addressData;
-    const result = await checkoutAddress(deliveryCode, weight, cod);
+    const { deliveryPostcode, weight, cod } = addressData;
+    const result = await checkoutAddress(deliveryPostcode, weight, cod);
 
     return successResponse(res, "Courier serviceability checked!", result);
   } catch (error) {

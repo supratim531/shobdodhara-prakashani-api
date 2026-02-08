@@ -5,7 +5,7 @@ import { createRazorpayOrder } from "./paymentServices.js";
 import { checkCourierServiceability } from "./shiprocketServices.js";
 import { fetchCartItems, fetchCartSummary } from "./cartServices.js";
 
-const prepareCheckout = async (userId, addressId) => {
+const prepareCheckout = async (userId, addressId, shippingCost) => {
   // Validate address
   const user = await fetchCurrentProfile(userId);
   const address = user.addresses.find(
@@ -77,9 +77,9 @@ const prepareCheckout = async (userId, addressId) => {
     stockVerified: true,
   }));
 
-  // Recalculate final summary: subtotal, coupon & shipping
+  // Recalculate final summary: subtotal and shipping cost
   const cartSummary = await fetchCartSummary(userId);
-  const totalAmount = cartSummary.subtotal + cartSummary.shipping;
+  const totalAmount = cartSummary.subtotal + shippingCost;
 
   // Create Razorpay order
   const razorpayOrder = await createRazorpayOrder(userId, totalAmount, {
@@ -117,7 +117,7 @@ const prepareCheckout = async (userId, addressId) => {
       items,
       subtotal: cartSummary.subtotal,
       saved: cartSummary.saved,
-      deliveryFee: cartSummary.shipping,
+      deliveryFee: shippingCost,
       totalPayable: totalAmount,
     },
 
@@ -126,9 +126,9 @@ const prepareCheckout = async (userId, addressId) => {
   };
 };
 
-const checkoutAddress = async (deliveryCode, weight, cod = 0) => {
+const checkoutAddress = async (deliveryPostcode, weight, cod = 0) => {
   const serviceabilityResult = await checkCourierServiceability(
-    deliveryCode,
+    deliveryPostcode,
     weight,
     cod,
   );

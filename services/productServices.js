@@ -105,7 +105,7 @@ const fetchAllProducts = async (query) => {
         sort,
         skip,
         limit: perPage,
-      })
+      }),
     );
     items = result?.data || [];
     totalItems = result?.totalItems || 0;
@@ -124,7 +124,7 @@ const fetchAllProducts = async (query) => {
         sort,
         skip,
         limit: perPage,
-      })
+      }),
     );
     items = result?.data || [];
     totalItems = result?.totalItems || 0;
@@ -172,12 +172,12 @@ const updateProduct = async (
   productData,
   categoryData,
   bookId,
-  clothesId
+  clothesId,
 ) => {
   const updatedProduct = await Product.findByIdAndUpdate(
     productId,
     { $set: productData },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedProduct) {
@@ -190,7 +190,7 @@ const updateProduct = async (
     book = await Book.findByIdAndUpdate(
       bookId,
       { $set: categoryData },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -198,7 +198,7 @@ const updateProduct = async (
     clothes = await Clothes.findByIdAndUpdate(
       clothesId,
       { $set: categoryData },
-      { new: true }
+      { new: true },
     );
   }
 
@@ -207,6 +207,17 @@ const updateProduct = async (
     ...(book && { book: book.toJSON() }),
     ...(clothes && { clothes: clothes.toJSON() }),
   };
+};
+
+const updateProductSales = async (orderItems) => {
+  const bulkOps = orderItems.map((item) => ({
+    updateOne: {
+      filter: { _id: item.productId },
+      update: { $inc: { totalSales: item.quantity } },
+    },
+  }));
+
+  await Product.bulkWrite(bulkOps);
 };
 
 const deleteProduct = async (productId) => {
@@ -280,6 +291,7 @@ export {
   fetchAllProducts,
   fetchProductById,
   updateProduct,
+  updateProductSales,
   deleteProduct,
   deleteProducts,
   deleteAllProducts,

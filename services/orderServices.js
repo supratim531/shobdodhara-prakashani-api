@@ -3,6 +3,7 @@ import Order from "../models/orderModel.js";
 import OrderItem from "../models/orderItemModel.js";
 import Reservation from "../models/reservationModel.js";
 import { fetchCartItems } from "./cartServices.js";
+import { updateProductSales } from "./productServices.js";
 import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 
 const fetchAllUserOrders = async (userId, query) => {
@@ -122,6 +123,9 @@ const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
   await OrderItem.insertMany(orderItems);
   await Reservation.deleteMany({ userId });
 
+  // Update product sales count
+  await updateProductSales(orderItems);
+
   return order;
 };
 
@@ -172,7 +176,7 @@ const updateOrderShippingStatus = async (orderId, trackingData) => {
   const updatedOrder = await Order.findByIdAndUpdate(
     orderId,
     { $set: updateFields },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedOrder) {

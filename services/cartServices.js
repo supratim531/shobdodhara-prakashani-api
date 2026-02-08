@@ -289,8 +289,6 @@ const fetchCartSummary = async (userId) => {
     }
   }
 
-  cartSummary.shipping = cartSummary.subtotal > 500 ? 0 : 50;
-
   return cartSummary;
 };
 

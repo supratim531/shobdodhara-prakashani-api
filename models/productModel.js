@@ -85,6 +85,13 @@ const productSchema = new mongoose.Schema(
       min: 1,
     },
 
+    totalSales: {
+      type: Number,
+      default: 0,
+      min: 0,
+      index: true,
+    },
+
     isActive: {
       type: Boolean,
       required: true,
@@ -93,16 +100,16 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 productSchema.index(
   { title: "text", description: "text" },
-  { weights: { title: 5, description: 1 } }
+  { weights: { title: 5, description: 1 } },
 );
 productSchema.index(
   { isActive: 1 },
-  { partialFilterExpression: { isActive: true } }
+  { partialFilterExpression: { isActive: true } },
 );
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ createdAt: -1 });

@@ -5,7 +5,7 @@ module.exports = {
       name: "shobdodhara-prakashani-api",
       script: "./server.js",
 
-      env_development: {
+      env: {
         NODE_ENV: "development",
         ENV_FILE: ".env.development",
       },
@@ -20,7 +20,7 @@ module.exports = {
       name: "email-worker",
       script: "./workers/emailWorker.js",
 
-      env_development: {
+      env: {
         NODE_ENV: "development",
         ENV_FILE: ".env.development",
       },

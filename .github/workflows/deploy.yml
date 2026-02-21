@@ -42,7 +42,7 @@ jobs:
             export $(grep -v '^#' .env.development | xargs)
 
             echo "→ Restarting PM2"
-            pm2 reload ecosystem.config.cjs --env development --update-env \
+            pm2 restart ecosystem.config.cjs --env development --update-env \
               || pm2 start ecosystem.config.cjs --env development --update-env
 
             pm2 save

@@ -14,10 +14,10 @@ const client = twilio(
 
 console.log("sendSMS.js: client ->", environment, client);
 
-const sendSMS = async ({ from, to, body }) => {
+const sendSMS = async ({ phone, body }) => {
   const sms = {
-    from,
-    to,
+    from: process.env.TWILIO_PHONE_NUMBER,
+    to: `+91${phone}`,
     body,
   };
 

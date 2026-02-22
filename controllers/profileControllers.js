@@ -1,7 +1,8 @@
 import emailQueue from "../queues/emailQueue.js";
+import messageQueue from "../queues/messageQueue.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { SEND_OTP_EMAIL_JOB } from "../constants/jobs.js";
+import { SEND_OTP_JOB } from "../constants/jobs.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -48,7 +49,7 @@ const fetchCurrentProfileController = expressAsyncHandler(async (req, res) => {
  */
 const updateProfileController = expressAsyncHandler(async (req, res) => {
   const { value: updatedUserData, error } = validateUpdateProfilePayload(
-    req.body
+    req.body,
   );
 
   if (error) {
@@ -82,7 +83,7 @@ const initiateChangeContactController = expressAsyncHandler(
     const { contact, otp } = await initiateChangeContact(
       req.user.id,
       email,
-      phone
+      phone,
     );
 
     if (email) {
@@ -106,16 +107,21 @@ const initiateChangeContactController = expressAsyncHandler(
         `,
       };
 
-      await emailQueue.add(SEND_OTP_EMAIL_JOB, mail);
+      await emailQueue.add(SEND_OTP_JOB, mail);
     } else {
-      console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
+      const sms = {
+        phone,
+        body: `Your Shobdodhara verification code: ${otp}`,
+      };
+
+      await messageQueue.add(SEND_OTP_JOB, sms);
     }
 
     return successResponse(res, `OTP sent successfully at ${email || phone}.`, {
       contact,
       otp,
     });
-  }
+  },
 );
 
 /**
@@ -180,7 +186,7 @@ const saveAddressController = expressAsyncHandler(async (req, res) => {
     res,
     "Address saved successfully!",
     address,
-    CREATED.code
+    CREATED.code,
   );
 });
 
@@ -191,7 +197,7 @@ const saveAddressController = expressAsyncHandler(async (req, res) => {
  */
 const updateAddressController = expressAsyncHandler(async (req, res) => {
   const { value: updatedAddressData, error } = validateUpdateAddressPayload(
-    req.body
+    req.body,
   );
 
   if (error) {
@@ -203,7 +209,7 @@ const updateAddressController = expressAsyncHandler(async (req, res) => {
   const updatedAddress = await updateAddress(
     req.user.id,
     req.params.addressId,
-    updatedAddressData
+    updatedAddressData,
   );
 
   if (!updatedAddress) {
@@ -240,7 +246,7 @@ const deleteAddressController = expressAsyncHandler(async (req, res) => {
 const updateDefaultAddressController = expressAsyncHandler(async (req, res) => {
   const updatedAddress = await updateDefaultAddress(
     req.user.id,
-    req.params.addressId
+    req.params.addressId,
   );
 
   if (!updatedAddress) {
@@ -252,7 +258,7 @@ const updateDefaultAddressController = expressAsyncHandler(async (req, res) => {
   return successResponse(
     res,
     "Default address updated successfully!",
-    updatedAddress
+    updatedAddress,
   );
 });
 

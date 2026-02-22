@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
 import { Worker } from "bullmq";
-import sendMail from "../utils/sendMail.js";
-import { EMAIL_QUEUE } from "../constants/queues.js";
+import sendSMS from "../utils/sendSMS.js";
+import { SEND_OTP_JOB } from "../constants/jobs.js";
+import { MESSAGE_QUEUE } from "../constants/queues.js";
 import { redisClient } from "../config/redisConfig.js";
 import { connectDatabase } from "../config/dbConfig.js";
-import { SEND_OTP_JOB, SEND_CART_REMINDER_JOB } from "../constants/jobs.js";
 
 const environment = process.env.NODE_ENV || "development";
 const ENV_PATH =
@@ -14,25 +14,20 @@ dotenv.config({ path: ENV_PATH, quiet: true });
 
 connectDatabase();
 
-const emailJobHandlers = {
+const messageJobHandlers = {
   [SEND_OTP_JOB]: async (job) => {
-    const res = await sendMail(job.data);
-    return res;
-  },
-
-  [SEND_CART_REMINDER_JOB]: async (job) => {
-    const res = await sendMail(job.data);
+    const res = await sendSMS(job.data);
     return res;
   },
 };
 
-const runEmailWorker = async () => {
-  console.log("----- Email worker is running -----");
+const runMessageWorker = async () => {
+  console.log("----- Message worker is running -----");
 
   const worker = new Worker(
-    EMAIL_QUEUE,
+    MESSAGE_QUEUE,
     async (job) => {
-      const handler = emailJobHandlers[job.name];
+      const handler = messageJobHandlers[job.name];
 
       if (!handler) throw new Error(`Unknown job: ${job.name}`);
 
@@ -54,4 +49,4 @@ const runEmailWorker = async () => {
   });
 };
 
-runEmailWorker();
+runMessageWorker();

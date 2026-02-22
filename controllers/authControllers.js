@@ -1,7 +1,8 @@
 import emailQueue from "../queues/emailQueue.js";
+import messageQueue from "../queues/messageQueue.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
-import { SEND_OTP_EMAIL_JOB } from "../constants/jobs.js";
+import { SEND_OTP_JOB } from "../constants/jobs.js";
 import { authenticate, verifyOTP } from "../services/authServices.js";
 import { BAD_REQUEST, UNPROCESSABLE_ENTITY } from "../constants/statusCodes.js";
 import {
@@ -20,7 +21,7 @@ import {
  */
 const authenticateController = expressAsyncHandler(async (req, res) => {
   const { value: authenticationData, error } = validateAuthenticatePayload(
-    req.body
+    req.body,
   );
 
   if (error) {
@@ -45,9 +46,15 @@ const authenticateController = expressAsyncHandler(async (req, res) => {
         <p style="text-align: center;">It's good to have you.</p>
       `,
     };
-    await emailQueue.add(SEND_OTP_EMAIL_JOB, mail);
+
+    await emailQueue.add(SEND_OTP_JOB, mail);
   } else {
-    console.log("await sendSMS(phone, `Your OTP is ${otp}`)");
+    const sms = {
+      phone,
+      body: `Your Shobdodhara verification code: ${otp}`,
+    };
+
+    await messageQueue.add(SEND_OTP_JOB, sms);
   }
 
   return successResponse(res, `OTP sent successfully at ${email || phone}.`, {

@@ -30,5 +30,20 @@ module.exports = {
         ENV_FILE: ".env.production",
       },
     },
+    {
+      // ---------- MESSAGE WORKER ----------
+      name: "message-worker",
+      script: "./workers/messageWorker.js",
+
+      env_development: {
+        NODE_ENV: "development",
+        ENV_FILE: ".env.development",
+      },
+
+      env_production: {
+        NODE_ENV: "production",
+        ENV_FILE: ".env.production",
+      },
+    },
   ],
 };

@@ -1,6 +1,7 @@
 import pLimit from "p-limit";
 import Product from "../models/productModel.js";
 import Reservation from "../models/reservationModel.js";
+import { cacheInvalidate } from "../utils/cache.js";
 
 const limit = pLimit(10); // process max 10 reservations at a time
 
@@ -20,12 +21,13 @@ const processExpiredReservations = async () => {
 
       // Remove expired reservation
       await Reservation.findByIdAndDelete(reservation._id);
-    })
+    }),
   );
 
   await Promise.all(tasks);
+  await cacheInvalidate(["api:v1:product*"]);
   console.log(
-    `----- ${expiredReservations.length} expired reservation(s) processed -----`
+    `----- ${expiredReservations.length} expired reservation(s) processed -----`,
   );
 };
 

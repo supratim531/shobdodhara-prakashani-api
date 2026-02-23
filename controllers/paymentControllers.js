@@ -1,3 +1,4 @@
+import { cacheInvalidate } from "../utils/cache.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import { validateVerifyPaymentPayload } from "../validators/paymentValidators.js";
@@ -34,7 +35,6 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       shippingAddress,
       courierId,
     } = paymentData;
-
     const data = await verifyPayment(
       req.user.id,
       razorpay_order_id,
@@ -43,6 +43,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       shippingAddress,
       courierId,
     );
+    await cacheInvalidate(["api:v1:product*"]);
 
     return successResponse(
       res,
@@ -105,6 +106,7 @@ const processPaymentSuccessController = expressAsyncHandler(
       shippingAddress,
       courierId,
     );
+    await cacheInvalidate(["api:v1:product*"]);
 
     return successResponse(
       res,

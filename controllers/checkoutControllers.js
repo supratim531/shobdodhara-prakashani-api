@@ -1,3 +1,4 @@
+import { cacheInvalidate } from "../utils/cache.js";
 import { successResponse } from "../utils/response.js";
 import expressAsyncHandler from "express-async-handler";
 import {
@@ -38,6 +39,7 @@ const prepareCheckoutController = expressAsyncHandler(async (req, res) => {
       addressId,
       shippingCost,
     );
+    await cacheInvalidate(["api:v1:product*"]);
 
     return successResponse(
       res,

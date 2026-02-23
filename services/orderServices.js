@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
+import Cart from "../models/cartModel.js";
 import Order from "../models/orderModel.js";
 import OrderItem from "../models/orderItemModel.js";
 import Reservation from "../models/reservationModel.js";
-import { fetchCartItems } from "./cartServices.js";
 import { updateProductSales } from "./productServices.js";
+import { fetchCartItems, clearCartItems } from "./cartServices.js";
 import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 
 const fetchAllUserOrders = async (userId, query) => {
@@ -125,6 +126,13 @@ const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
 
   // Update product sales count
   await updateProductSales(orderItems);
+
+  // Update user's cart status to CONVERTED
+  await clearCartItems(userId);
+  await Cart.findOneAndUpdate(
+    { userId },
+    { status: "CONVERTED", updatedAt: new Date() },
+  );
 
   return order;
 };

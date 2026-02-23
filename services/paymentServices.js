@@ -74,25 +74,25 @@ const verifyPayment = async (
     shippingAddress,
   );
 
-  // Create Shiprocket order
-  const shiprocketOrder = await createShiprocketOrder(order._id, "Prepaid");
+  // // Create Shiprocket order
+  // const shiprocketOrder = await createShiprocketOrder(order._id, "Prepaid");
 
-  // Assign courier for the order
-  const assignedCourier = await assignCourier(
-    order._id,
-    shiprocketOrder.shipment_id,
-    courierId,
-    shiprocketOrder.status,
-  );
+  // // Assign courier for the order
+  // const assignedCourier = await assignCourier(
+  //   order._id,
+  //   shiprocketOrder.shipment_id,
+  //   courierId,
+  //   shiprocketOrder.status,
+  // );
 
-  // Schedule pickup (MOST IMPORTANT)
-  const scheduledPickup = await schedulePickup(
-    order._id,
-    shiprocketOrder.shipment_id,
-  );
+  // // Schedule pickup (MOST IMPORTANT)
+  // const scheduledPickup = await schedulePickup(
+  //   order._id,
+  //   shiprocketOrder.shipment_id,
+  // );
 
-  return { order, shiprocketOrder, assignedCourier, scheduledPickup };
-  return { order, shiprocketOrder };
+  // return { order, shiprocketOrder, assignedCourier, scheduledPickup };
+  // return { order, shiprocketOrder };
   return { order };
 };
 

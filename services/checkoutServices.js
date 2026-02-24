@@ -24,8 +24,18 @@ const prepareCheckout = async (userId, addressId, shippingCost) => {
     throw new Error("Cart is empty.");
   }
 
-  // Clear any existing reservations for this user
-  await Reservation.deleteMany({ userId });
+  // Clear any existing reservations for this user and restore previous stock(s)
+  const existingReservations = await Reservation.find({ userId });
+
+  for (const reservation of existingReservations) {
+    // Restore stock to product
+    await Product.findByIdAndUpdate(reservation.productId, {
+      $inc: { stock: reservation.quantity },
+    });
+
+    // Remove previous reservation
+    await Reservation.findByIdAndDelete(reservation._id);
+  }
 
   // Re-validate product price + stock
   for (const item of cartItems) {
@@ -55,7 +65,7 @@ const prepareCheckout = async (userId, addressId, shippingCost) => {
     }
 
     // Create reservation
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+    const expiresAt = new Date(Date.now() + 12 * 60 * 1000); // 12 minutes from now
     await Reservation.create({
       productId: item.productId,
       userId,

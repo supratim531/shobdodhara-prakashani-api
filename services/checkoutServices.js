@@ -90,7 +90,9 @@ const prepareCheckout = async (userId, addressId, shippingCost) => {
 
   // Recalculate final summary: subtotal and shipping cost
   const cartSummary = await fetchCartSummary(userId);
-  const totalAmount = cartSummary.subtotal + shippingCost;
+  const subtotalAmount = cartSummary.subtotal + shippingCost;
+  const platformFee = +(subtotalAmount * 0.03).toFixed(2); // 3% (2% for razorpay + 1% for website)
+  const totalAmount = cartSummary.subtotal + shippingCost + platformFee;
 
   // Create Razorpay order
   const razorpayOrder = await createRazorpayOrder(userId, totalAmount, {
@@ -127,9 +129,10 @@ const prepareCheckout = async (userId, addressId, shippingCost) => {
     checkoutSummary: {
       items,
       subtotal: cartSummary.subtotal,
-      saved: cartSummary.saved,
       deliveryFee: shippingCost,
+      platformFee,
       totalPayable: totalAmount,
+      saved: cartSummary.saved,
     },
 
     // Frontend uses this to open Razorpay/Stripe

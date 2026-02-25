@@ -255,8 +255,8 @@ const fetchCartSummary = async (userId) => {
   const cartItems = await fetchCartItems(userId);
   const cartSummary = {
     subtotal: 0,
-    saved: 0,
     itemCount: 0,
+    saved: 0,
   };
 
   if (!cartItems.length) return cartSummary;

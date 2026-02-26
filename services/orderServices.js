@@ -90,7 +90,12 @@ const fetchUserOrderById = async (userId, orderId) => {
   return item[0];
 };
 
-const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
+const createOrderAfterPayment = async (
+  userId,
+  paymentId,
+  totalAmount,
+  shippingAddress,
+) => {
   // Fetch cart items
   const cartItems = await fetchCartItems(userId);
 
@@ -98,14 +103,11 @@ const createOrderAfterPayment = async (userId, paymentId, shippingAddress) => {
     throw new Error("Cart is empty.");
   }
 
-  // Calculate total price
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-
   // Create order
   const order = await Order.create({
     userId: new mongoose.Types.ObjectId(userId),
     paymentId: new mongoose.Types.ObjectId(paymentId),
-    totalPrice,
+    totalPrice: totalAmount,
     shippingAddress,
     orderedAt: new Date(),
   });

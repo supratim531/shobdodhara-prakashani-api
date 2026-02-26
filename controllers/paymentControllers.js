@@ -29,6 +29,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
 
   try {
     const {
+      totalAmount,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
@@ -37,6 +38,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
     } = paymentData;
     const data = await verifyPayment(
       req.user.id,
+      totalAmount,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,

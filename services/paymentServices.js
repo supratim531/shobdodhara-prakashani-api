@@ -34,6 +34,7 @@ const createRazorpayOrder = async (userId, totalAmount, userDetails) => {
 
 const verifyPayment = async (
   userId,
+  totalAmount,
   razorpayOrderId,
   razorpayPaymentId,
   razorpaySignature,
@@ -71,6 +72,7 @@ const verifyPayment = async (
   const order = await createOrderAfterPayment(
     userId,
     payment._id,
+    totalAmount,
     shippingAddress,
   );
 

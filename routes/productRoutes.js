@@ -20,7 +20,7 @@ router
   .delete(
     handleValidateToken,
     handleRole("ADMIN"),
-    deleteAllProductsController
+    deleteAllProductsController,
   );
 
 router

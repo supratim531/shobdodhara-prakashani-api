@@ -45,7 +45,7 @@ const pickBySchema = (payload, mongooseModel) => {
   if (!mongooseModel || !mongooseModel.schema) return {};
 
   const schemaKeys = Object.keys(mongooseModel.schema.paths).filter(
-    (k) => !k.startsWith("_") && k !== "__v"
+    (k) => !k.startsWith("_") && k !== "__v",
   );
 
   return schemaKeys.reduce((out, key) => {
@@ -108,7 +108,7 @@ const saveProductController = expressAsyncHandler(async (req, res) => {
       res,
       "Product saved successfully!",
       data,
-      CREATED.code
+      CREATED.code,
     );
   } catch (error) {
     res.status(BAD_REQUEST.code);
@@ -227,7 +227,7 @@ const updateProductController = expressAsyncHandler(async (req, res) => {
       productData,
       categoryData,
       bookId,
-      clothesId
+      clothesId,
     );
     await cacheInvalidate(["api:v1:product*"]);
 
@@ -276,7 +276,7 @@ const deleteProductController = expressAsyncHandler(async (req, res) => {
  */
 const deleteProductsController = expressAsyncHandler(async (req, res) => {
   const { value: deleteProductsData, error } = validateDeleteProductsPayload(
-    req.body
+    req.body,
   );
 
   if (error) {
@@ -292,7 +292,7 @@ const deleteProductsController = expressAsyncHandler(async (req, res) => {
     return successResponse(
       res,
       "Selected products deleted successfully!",
-      result
+      result,
     );
   } catch (error) {
     if (error.message === "No products found with the provided IDs.") {

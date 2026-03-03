@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+const toCapitalizeCase = (value) => {
+  if (!value) return value;
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+};
+
 const bookSchema = new mongoose.Schema(
   {
     productId: {
@@ -17,6 +22,13 @@ const bookSchema = new mongoose.Schema(
       index: true,
     },
 
+    coEditor: {
+      type: String,
+      trim: true,
+      minLength: 2,
+      index: true,
+    },
+
     publisher: {
       type: String,
       required: true,
@@ -25,7 +37,6 @@ const bookSchema = new mongoose.Schema(
 
     isbn: {
       type: String,
-      required: true,
       trim: true,
       unique: true,
       index: true,
@@ -52,15 +63,22 @@ const bookSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+
+    binding: {
+      type: String,
+      required: true,
+      trim: true,
+      set: toCapitalizeCase,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 bookSchema.index(
   { author: "text", publisher: "text", genre: "text" },
-  { weights: { author: 5, publisher: 3, genre: 1 } }
+  { weights: { author: 5, publisher: 3, genre: 1 } },
 );
 
 bookSchema.set("toJSON", { versionKey: false });

@@ -22,7 +22,7 @@ export const validateSaveProductPayload = (payload) => {
     breadth: Joi.number().min(0.6).required().label("breadth"),
     height: Joi.number().min(0.6).required().label("height"),
     weight: Joi.number().min(0.1).required().label("weight"),
-    publishedAt: Joi.date().iso().required().label("publishedAt"), // published date (YYYY-MM-DD)
+    publishedAt: Joi.date().iso().required().label("publishedAt"), // published date format (YYYY-MM-DD)
   });
 
   return saveProductSchema.validate(payload, { abortEarly: false });
@@ -31,11 +31,13 @@ export const validateSaveProductPayload = (payload) => {
 export const validateSaveBookPayload = (payload) => {
   const saveBookSchema = Joi.object({
     author: Joi.string().min(2).required().label("author"),
+    coEditor: Joi.string().min(2).optional().label("coEditor"),
     publisher: Joi.string().required().label("publisher"),
-    isbn: Joi.string().required().label("isbn"),
+    isbn: Joi.string().optional().label("isbn"),
     genre: Joi.string().required().label("genre"),
     language: Joi.string().required().label("language"),
     pages: Joi.number().min(1).required().label("pages"),
+    binding: Joi.string().required().label("binding"),
   });
 
   return saveBookSchema.validate(payload, { abortEarly: false });
@@ -80,11 +82,13 @@ export const validateUpdateProductPayload = (payload) => {
 export const validateUpdateBookPayload = (payload) => {
   const updateBookSchema = Joi.object({
     author: Joi.string().min(2).label("author"),
+    coEditor: Joi.string().min(2).label("coEditor"),
     publisher: Joi.string().label("publisher"),
     isbn: Joi.string().label("isbn"),
     genre: Joi.string().label("genre"),
     language: Joi.string().label("language"),
     pages: Joi.number().min(1).label("pages"),
+    binding: Joi.string().label("binding"),
   });
 
   return updateBookSchema.validate(payload, { abortEarly: false });

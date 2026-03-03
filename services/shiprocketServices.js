@@ -279,6 +279,37 @@ const assignCourier = async (orderId, shipmentId, courierId, orderStatus) => {
   }
 };
 
+const generateLabel = async (...shipmentIds) => {
+  try {
+    const token = await getValidToken();
+    const response = await axios.post(
+      `${process.env.SHIPROCKET_API_BASE_URL}/external/courier/generate/label`,
+      {
+        shipment_id: shipmentIds,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    AppLogger.error("Label generation failed:", error, {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw new Error(
+      `Could not generate label: ${
+        error.response?.data?.message || error.response?.data || error.message
+      }`,
+    );
+  }
+};
+
 const schedulePickup = async (orderId, shipmentId) => {
   try {
     const token = await getValidToken();
@@ -441,6 +472,7 @@ export {
   createShiprocketOrder,
   checkCourierServiceability,
   assignCourier,
+  generateLabel,
   schedulePickup,
   trackShipment,
   getShipmentStatus,

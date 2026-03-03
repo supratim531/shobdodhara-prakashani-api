@@ -162,6 +162,7 @@ const createShiprocketOrder = async (orderId, paymentMethod) => {
     // Update order with Shiprocket details
     await Order.findByIdAndUpdate(orderId, {
       shiprocketOrderId: response.data.order_id.toString(),
+      shiprocketShipmentId: response.data.shipment_id.toString(),
       shiprocketStatus: response.data.status,
     });
 
@@ -372,52 +373,6 @@ const getShipmentStatus = async (shiprocketOrderId) => {
   }
 };
 
-const scheduleDelayedPickups = async () => {
-  try {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const ordersToSchedule = await Order.find({
-      pickupScheduled: false,
-      awbCode: { $exists: true, $ne: null },
-      orderedAt: { $lte: twentyFourHoursAgo },
-    });
-
-    AppLogger.info(
-      `Found ${ordersToSchedule.length} orders ready for pickup scheduling`,
-    );
-
-    for (const order of ordersToSchedule) {
-      try {
-        const shiprocketOrder = await getShipmentStatus(
-          order.shiprocketOrderId,
-        );
-        const shipmentId = shiprocketOrder.data.shipments[0].id;
-
-        await schedulePickup(order._id, shipmentId);
-
-        await Order.findByIdAndUpdate(order._id, {
-          pickupScheduled: true,
-          pickupScheduledAt: new Date(),
-        });
-
-        AppLogger.info(`Pickup scheduled for order ${order._id}`);
-      } catch (error) {
-        AppLogger.error(
-          `Failed to schedule pickup for order ${order._id}:`,
-          error.message,
-        );
-      }
-    }
-
-    return {
-      success: true,
-      message: `Total ${ordersToSchedule.length} order(s) scheduled`,
-    };
-  } catch (error) {
-    AppLogger.error("Error in processDelayedPickups:", error.message);
-    throw error;
-  }
-};
-
 const handleWebhook = async (webhookData) => {
   const { order_id, ...rest } = webhookData;
   const current_status = rest.current_status.toUpperCase();
@@ -489,6 +444,5 @@ export {
   schedulePickup,
   trackShipment,
   getShipmentStatus,
-  scheduleDelayedPickups,
   handleWebhook,
 };

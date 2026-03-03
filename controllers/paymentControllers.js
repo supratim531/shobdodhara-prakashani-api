@@ -36,6 +36,7 @@ const verifyPaymentController = expressAsyncHandler(async (req, res) => {
       shippingAddress,
       courierId,
     } = paymentData;
+
     const data = await verifyPayment(
       req.user.id,
       totalAmount,
@@ -101,12 +102,13 @@ const handleWebhookController = expressAsyncHandler(async (req, res) => {
  */
 const processPaymentSuccessController = expressAsyncHandler(
   async (req, res) => {
-    const { paymentId, shippingAddress, courierId } = req.body;
+    const { totalAmount, paymentId, courierId, shippingAddress } = req.body;
     const data = await processPaymentSuccess(
       req.user.id,
+      totalAmount,
       paymentId,
-      shippingAddress,
       courierId,
+      shippingAddress,
     );
     await cacheInvalidate(["api:v1:product*"]);
 

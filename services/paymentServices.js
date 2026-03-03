@@ -141,14 +141,16 @@ const handleWebhook = async (webhookData, webhookSignature) => {
 
 const processPaymentSuccess = async (
   userId,
+  totalAmount,
   paymentId,
-  shippingAddress,
   courierId,
+  shippingAddress,
 ) => {
   // Create order after successful payment
   const order = await createOrderAfterPayment(
     userId,
     paymentId,
+    totalAmount,
     shippingAddress,
   );
 

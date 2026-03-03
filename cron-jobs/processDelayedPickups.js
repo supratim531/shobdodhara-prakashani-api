@@ -13,7 +13,7 @@ const processDelayedPickups = async () => {
     });
 
     AppLogger.info(
-      `Found ${ordersToSchedule.length} orders ready for pickup scheduling`,
+      `Found ${ordersToSchedule.length} order(s) ready for pickup scheduling`,
     );
 
     for (const order of ordersToSchedule) {
@@ -33,10 +33,10 @@ const processDelayedPickups = async () => {
       }
     }
 
-    return {
-      success: true,
-      message: `Total ${ordersToSchedule.length} order(s) scheduled`,
-    };
+    console.log(
+      `----- Total ${ordersToSchedule.length} order(s) scheduled -----`,
+    );
+    console.log(`----- Delayed pickup scheduling process completed -----`);
   } catch (error) {
     AppLogger.error("Error in processDelayedPickups:", error.message);
     throw error;

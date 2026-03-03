@@ -2,11 +2,7 @@ import crypto from "crypto";
 import Payment from "../models/paymentModel.js";
 import { createOrderAfterPayment } from "./orderServices.js";
 import { razorpayClient, RAZORPAY_CONFIG } from "../config/razorpayConfig.js";
-import {
-  createShiprocketOrder,
-  assignCourier,
-  schedulePickup,
-} from "./shiprocketServices.js";
+import { createShiprocketOrder, assignCourier } from "./shiprocketServices.js";
 
 const createRazorpayOrder = async (userId, totalAmount, userDetails) => {
   const totalAmountInPaise = +(totalAmount * 100).toFixed(2);
@@ -87,15 +83,7 @@ const verifyPayment = async (
     shiprocketOrder.status,
   );
 
-  // Schedule pickup (MOST IMPORTANT)
-  const scheduledPickup = await schedulePickup(
-    order._id,
-    shiprocketOrder.shipment_id,
-  );
-
-  return { order, shiprocketOrder, assignedCourier, scheduledPickup };
-  // return { order, shiprocketOrder };
-  // return { order };
+  return { order, shiprocketOrder, assignedCourier };
 };
 
 const handleWebhook = async (webhookData, webhookSignature) => {
@@ -175,13 +163,7 @@ const processPaymentSuccess = async (
     shiprocketOrder.status,
   );
 
-  // Schedule pickup (MOST IMPORTANT)
-  const scheduledPickup = await schedulePickup(
-    order._id,
-    shiprocketOrder.shipment_id,
-  );
-
-  return { order, shiprocketOrder, assignedCourier, scheduledPickup };
+  return { order, shiprocketOrder, assignedCourier };
 };
 
 export {

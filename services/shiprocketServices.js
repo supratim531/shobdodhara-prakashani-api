@@ -372,6 +372,52 @@ const getShipmentStatus = async (shiprocketOrderId) => {
   }
 };
 
+const scheduleDelayedPickups = async () => {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const ordersToSchedule = await Order.find({
+      pickupScheduled: false,
+      awbCode: { $exists: true, $ne: null },
+      orderedAt: { $lte: twentyFourHoursAgo },
+    });
+
+    AppLogger.info(
+      `Found ${ordersToSchedule.length} orders ready for pickup scheduling`,
+    );
+
+    for (const order of ordersToSchedule) {
+      try {
+        const shiprocketOrder = await getShipmentStatus(
+          order.shiprocketOrderId,
+        );
+        const shipmentId = shiprocketOrder.data.shipments[0].id;
+
+        await schedulePickup(order._id, shipmentId);
+
+        await Order.findByIdAndUpdate(order._id, {
+          pickupScheduled: true,
+          pickupScheduledAt: new Date(),
+        });
+
+        AppLogger.info(`Pickup scheduled for order ${order._id}`);
+      } catch (error) {
+        AppLogger.error(
+          `Failed to schedule pickup for order ${order._id}:`,
+          error.message,
+        );
+      }
+    }
+
+    return {
+      success: true,
+      message: `Total ${ordersToSchedule.length} order(s) scheduled`,
+    };
+  } catch (error) {
+    AppLogger.error("Error in processDelayedPickups:", error.message);
+    throw error;
+  }
+};
+
 const handleWebhook = async (webhookData) => {
   const { order_id, ...rest } = webhookData;
   const current_status = rest.current_status.toUpperCase();
@@ -385,10 +431,10 @@ const handleWebhook = async (webhookData) => {
     return { success: true, message: "Order not found." };
   }
 
-  // Check idempotency - avoid processing same status twice
+  // // Check idempotency - avoid processing same status twice
   // if (order.shiprocketStatus === current_status && order.lastStatusUpdate) {
   //   AppLogger.warn(
-  //     `Status ${current_status} already processed for order ${order._id}`
+  //     `Status ${current_status} already processed for order ${order._id}`,
   //   );
 
   //   return { success: true, message: "Already processed." };
@@ -440,8 +486,9 @@ export {
   createShiprocketOrder,
   checkCourierServiceability,
   assignCourier,
+  schedulePickup,
   trackShipment,
   getShipmentStatus,
-  schedulePickup,
+  scheduleDelayedPickups,
   handleWebhook,
 };

@@ -21,6 +21,7 @@ import { handleGlobalError } from "./middlewares/globalErrorHandler.js";
 import initializeShiprocket from "./utils/initializeShiprocket.js";
 import processInactiveCarts from "./cron-jobs/processInactiveCarts.js";
 import processOrphanedImages from "./cron-jobs/processOrphanedImages.js";
+import processDelayedPickups from "./cron-jobs/processDelayedPickups.js";
 import refreshShiprocketToken from "./cron-jobs/refreshShiprocketToken.js";
 import processExpiredReservations from "./cron-jobs/processExpiredReservations.js";
 
@@ -63,9 +64,10 @@ const corsOptions = {
 };
 
 //============================ cron tabs =============================//
-cronScheduler(timers.everyMinute, processInactiveCarts);
-cronScheduler(timers.everyMinute, processExpiredReservations);
-cronScheduler(timers.everyFiveMinute, processOrphanedImages);
+cronScheduler(timers.everyFifteenMinute, processOrphanedImages);
+cronScheduler(timers.everyFiveMinute, processExpiredReservations);
+cronScheduler(timers.everyHour, processInactiveCarts);
+cronScheduler(timers.everyHour, processDelayedPickups);
 cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 //============================ cron tabs =============================//
 
@@ -111,12 +113,12 @@ app.listen(PORT, () => {
   createAdmin(
     process.env.PRIMARY_ADMIN_EMAIL,
     process.env.PRIMARY_ADMIN_PHONE,
-    process.env.PRIMARY_ADMIN_PASS
+    process.env.PRIMARY_ADMIN_PASS,
   );
   createAdmin(
     process.env.SECONDARY_ADMIN_EMAIL,
     process.env.SECONDARY_ADMIN_PHONE,
-    process.env.SECONDARY_ADMIN_PASS
+    process.env.SECONDARY_ADMIN_PASS,
   );
 
   // ShipRocket token creation

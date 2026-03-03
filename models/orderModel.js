@@ -37,6 +37,7 @@ const orderSchema = new mongoose.Schema(
 
     // Shiprocket integration fields
     shiprocketOrderId: { type: String },
+    shiprocketShipmentId: { type: String },
     awbCode: { type: String },
     courierCompany: { type: String },
     trackingUrl: { type: String },
@@ -44,6 +45,8 @@ const orderSchema = new mongoose.Schema(
     trackActivities: { type: [Object] },
     deliveredAt: { type: Date },
     lastStatusUpdate: { type: Date },
+    pickupScheduled: { type: Boolean, default: false },
+    pickupScheduledAt: { type: Date, default: null },
 
     orderedAt: {
       type: Date,
@@ -52,7 +55,7 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 orderSchema.index({ userId: 1, orderedAt: -1 });

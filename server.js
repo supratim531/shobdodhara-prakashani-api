@@ -67,7 +67,7 @@ const corsOptions = {
 cronScheduler(timers.everyFifteenMinute, processOrphanedImages);
 cronScheduler(timers.everyFiveMinute, processExpiredReservations);
 cronScheduler(timers.everyHour, processInactiveCarts);
-cronScheduler(timers.everyHour, processDelayedPickups);
+cronScheduler(timers.everyFiveMinute, processDelayedPickups);
 cronScheduler(timers.everyTweleveHour, refreshShiprocketToken);
 //============================ cron tabs =============================//
 

@@ -78,7 +78,11 @@ const bookSchema = new mongoose.Schema(
 
 bookSchema.index(
   { author: "text", publisher: "text", genre: "text" },
-  { weights: { author: 5, publisher: 3, genre: 1 } },
+  {
+    weights: { author: 5, publisher: 3, genre: 1 },
+    default_language: "none",
+    language_override: "others", // Prevent Mongo from using `language` field
+  },
 );
 
 bookSchema.set("toJSON", { versionKey: false });

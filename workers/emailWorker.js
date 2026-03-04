@@ -4,7 +4,11 @@ import sendMail from "../utils/sendMail.js";
 import { EMAIL_QUEUE } from "../constants/queues.js";
 import { redisClient } from "../config/redisConfig.js";
 import { connectDatabase } from "../config/dbConfig.js";
-import { SEND_OTP_JOB, SEND_CART_REMINDER_JOB } from "../constants/jobs.js";
+import {
+  SEND_OTP_JOB,
+  SEND_CART_REMINDER_JOB,
+  SEND_ORDER_CONFIRMATION_JOB,
+} from "../constants/jobs.js";
 
 const environment = process.env.NODE_ENV || "development";
 const ENV_PATH =
@@ -21,6 +25,11 @@ const emailJobHandlers = {
   },
 
   [SEND_CART_REMINDER_JOB]: async (job) => {
+    const res = await sendMail(job.data);
+    return res;
+  },
+
+  [SEND_ORDER_CONFIRMATION_JOB]: async (job) => {
     const res = await sendMail(job.data);
     return res;
   },

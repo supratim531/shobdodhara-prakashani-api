@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import Payment from "../models/paymentModel.js";
 import { createOrderAfterPayment } from "./orderServices.js";
+import { sendOrderConfirmationEmail } from "./emailServices.js";
 import { razorpayClient, RAZORPAY_CONFIG } from "../config/razorpayConfig.js";
 import { createShiprocketOrder, assignCourier } from "./shiprocketServices.js";
 
@@ -83,6 +84,9 @@ const verifyPayment = async (
     shiprocketOrder.status,
   );
 
+  // Send order confirmation email to admin
+  await sendOrderConfirmationEmail(order._id);
+
   return { order, shiprocketOrder, assignedCourier };
 };
 
@@ -164,6 +168,9 @@ const processPaymentSuccess = async (
     courierId,
     shiprocketOrder.status,
   );
+
+  // Send order confirmation email to admin
+  await sendOrderConfirmationEmail(order._id);
 
   return { order, shiprocketOrder, assignedCourier };
 };

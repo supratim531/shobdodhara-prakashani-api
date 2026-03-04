@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import Order from "../models/orderModel.js";
 import emailQueue from "../queues/emailQueue.js";
+import { generateLabel } from "./shiprocketServices.js";
 import { SEND_ORDER_CONFIRMATION_JOB } from "../constants/jobs.js";
 
 const environment = process.env.NODE_ENV || "development";
@@ -35,9 +36,19 @@ const sendOrderConfirmationEmail = async (orderId) => {
     throw new Error("Order not found");
   }
 
+  let labelUrl = "";
   const order = orderData[0];
   const user = order.user;
   const shippingAddress = order.shippingAddress;
+
+  if (order.shiprocketShipmentId) {
+    try {
+      const generatedLabel = await generateLabel(order.shiprocketShipmentId);
+      labelUrl = generatedLabel.label_url || "";
+    } catch (error) {
+      console.error("Failed to generate label:", error.message);
+    }
+  }
 
   const itemsTableRows = order.items
     .map(
@@ -115,6 +126,16 @@ const sendOrderConfirmationEmail = async (orderId) => {
             <h2 style="margin: 0 0 10px 0; color: #333;">Shipping Details</h2>
             <p style="margin: 5px 0;"><strong>AWB Code:</strong> ${order.awbCode}</p>
             <p style="margin: 5px 0;"><strong>Courier Company:</strong> ${order.courierCompany}</p>
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            labelUrl
+              ? `
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="${labelUrl}" target="_blank" style="display: inline-block; padding: 15px 30px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">📄 Generate Label</a>
           </div>
           `
               : ""

@@ -1,8 +1,15 @@
 import path from "path";
+import dotenv from "dotenv";
 import winston from "winston";
 import { Logtail } from "@logtail/node";
 import { LogtailTransport } from "@logtail/winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+
+const environment = process.env.NODE_ENV || "development";
+const ENV_PATH =
+  environment === "production" ? "./.env.production" : "./.env.development";
+
+dotenv.config({ path: ENV_PATH, quiet: true });
 
 // Create a Logtail client
 const logtail = new Logtail(process.env.BETTERSTACK_SOURCE_TOKEN, {
@@ -19,7 +26,7 @@ const logFormat = winston.format.combine(
     if (Object.keys(meta).length > 0)
       log += `\n${JSON.stringify(meta, null, 2)}`;
     return log;
-  })
+  }),
 );
 
 // Get current date for folder structure
@@ -64,7 +71,7 @@ const errorLogsTransport = new DailyRotateFile({
 const consoleTransport = new winston.transports.Console({
   format: winston.format.combine(
     winston.format.colorize(),
-    winston.format.simple()
+    winston.format.simple(),
   ),
   level: process.env.NODE_ENV === "production" ? "info" : "debug",
 });

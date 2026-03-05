@@ -31,9 +31,9 @@ export const validateSaveProductPayload = (payload) => {
 export const validateSaveBookPayload = (payload) => {
   const saveBookSchema = Joi.object({
     author: Joi.string().min(2).required().label("author"),
-    coEditor: Joi.string().min(2).optional().label("coEditor"),
+    coEditor: Joi.string().min(2).empty("").optional().label("coEditor"),
     publisher: Joi.string().required().label("publisher"),
-    isbn: Joi.string().optional().label("isbn"),
+    isbn: Joi.string().empty("").optional().label("isbn"),
     genre: Joi.string().required().label("genre"),
     language: Joi.string().required().label("language"),
     pages: Joi.number().min(1).required().label("pages"),

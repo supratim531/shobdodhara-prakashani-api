@@ -82,9 +82,9 @@ export const validateUpdateProductPayload = (payload) => {
 export const validateUpdateBookPayload = (payload) => {
   const updateBookSchema = Joi.object({
     author: Joi.string().min(2).label("author"),
-    coEditor: Joi.string().min(2).label("coEditor"),
+    coEditor: Joi.string().min(2).optional().label("coEditor"),
     publisher: Joi.string().label("publisher"),
-    isbn: Joi.string().label("isbn"),
+    isbn: Joi.string().optional().label("isbn"),
     genre: Joi.string().label("genre"),
     language: Joi.string().label("language"),
     pages: Joi.number().min(1).label("pages"),

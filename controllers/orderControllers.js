@@ -11,10 +11,25 @@ import {
   BAD_REQUEST,
 } from "../constants/statusCodes.js";
 import {
+  fetchAllOrders,
   fetchAllUserOrders,
   fetchUserOrderById,
   updateOrderShippingStatus,
 } from "../services/orderServices.js";
+
+/**
+ * @description Fetch all orders with pagination (Admin)
+ * @route GET /api/v1/order/all
+ * @access private (role: ADMIN)
+ */
+const fetchAllOrdersController = expressAsyncHandler(async (req, res) => {
+  const { items, meta } = await fetchAllOrders(req.query);
+
+  return successResponse(res, "All orders retrieved successfully.", {
+    items,
+    meta,
+  });
+});
 
 /**
  * @description Fetch user's orders with pagination
@@ -67,7 +82,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
       res.status(BAD_REQUEST.code);
       res.statusMessage = BAD_REQUEST.title;
       throw new Error(
-        "Order tracking not available. Order may not be shipped yet."
+        "Order tracking not available. Order may not be shipped yet.",
       );
     }
 
@@ -103,7 +118,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
     // Get updated order data
     const updatedOrder = await fetchUserOrderById(
       req.user.id,
-      req.params.orderId
+      req.params.orderId,
     );
 
     const trackingInfo = {
@@ -121,7 +136,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
     return successResponse(
       res,
       "Order tracking information retrieved.",
-      trackingInfo
+      trackingInfo,
     );
   } catch (error) {
     if (error.message === "Order not found.") {
@@ -140,6 +155,7 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
 });
 
 export {
+  fetchAllOrdersController,
   fetchAllUserOrdersController,
   fetchUserOrderByIdController,
   trackOrderController,

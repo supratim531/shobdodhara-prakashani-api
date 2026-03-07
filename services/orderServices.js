@@ -7,6 +7,124 @@ import { updateProductSales } from "./productServices.js";
 import { fetchCartItems, clearCartItems } from "./cartServices.js";
 import { getPaginationParams, buildMeta } from "../utils/pagination.js";
 
+const createOrderAfterPayment = async (
+  userId,
+  paymentId,
+  totalAmount,
+  shippingAddress,
+) => {
+  // Fetch cart items
+  const cartItems = await fetchCartItems(userId);
+
+  if (!cartItems.length) {
+    throw new Error("Cart is empty.");
+  }
+
+  // Create order
+  const order = await Order.create({
+    userId: new mongoose.Types.ObjectId(userId),
+    paymentId: new mongoose.Types.ObjectId(paymentId),
+    totalPrice: totalAmount,
+    shippingAddress,
+    orderedAt: new Date(),
+  });
+
+  // Create order items
+  const orderItems = cartItems.map((cartItem) => ({
+    orderId: order._id,
+    productId: cartItem.productId,
+    productSnapshot: cartItem.productSnapshot,
+    quantity: cartItem.quantity,
+    pricePerUnit: cartItem.productSnapshot.price,
+    totalPrice: cartItem.totalPrice,
+  }));
+
+  // First store order items in the db and then clear user reservations (payment successful)
+  await OrderItem.insertMany(orderItems);
+  await Reservation.deleteMany({ userId });
+
+  // Update product sales count
+  await updateProductSales(orderItems);
+
+  // Update user's cart status to CONVERTED
+  await clearCartItems(userId);
+  await Cart.findOneAndUpdate(
+    { userId },
+    { status: "CONVERTED", updatedAt: new Date() },
+  );
+
+  return order;
+};
+
+const fetchAllOrders = async (query) => {
+  const { page, perPage, skip } = getPaginationParams(query);
+  const [result] = await Order.aggregate([
+    {
+      $facet: {
+        data: [
+          { $sort: { orderedAt: -1 } },
+          { $skip: skip },
+          { $limit: perPage },
+          {
+            $lookup: {
+              from: "payments",
+              localField: "paymentId",
+              foreignField: "_id",
+              as: "payment",
+            },
+          },
+          { $unwind: "$payment" },
+          {
+            $lookup: {
+              from: "orderitems",
+              localField: "_id",
+              foreignField: "orderId",
+              as: "items",
+            },
+          },
+          {
+            $project: {
+              __v: 0,
+              "payment.__v": 0,
+              "payment.gatewayResponse": 0,
+              "items.__v": 0,
+              "items.orderId": 0,
+            },
+          },
+          {
+            $addFields: {
+              paymentCurrency: "$payment.currency",
+              paymentMethod: "$payment.method",
+            },
+          },
+          {
+            $project: {
+              payment: 0,
+            },
+          },
+        ],
+
+        totalCount: [{ $count: "count" }],
+      },
+    },
+
+    {
+      $addFields: {
+        totalItems: {
+          $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0],
+        },
+      },
+    },
+
+    { $project: { data: 1, totalItems: 1 } },
+  ]);
+  const items = result?.data || [];
+  const totalItems = result?.totalItems || 0;
+  const meta = buildMeta({ totalItems, page, perPage, paginationLimit: 10 });
+
+  return { items, meta };
+};
+
 const fetchAllUserOrders = async (userId, query) => {
   const { page, perPage, skip } = getPaginationParams(query);
   const [result] = await Order.aggregate([
@@ -90,55 +208,6 @@ const fetchUserOrderById = async (userId, orderId) => {
   return item[0];
 };
 
-const createOrderAfterPayment = async (
-  userId,
-  paymentId,
-  totalAmount,
-  shippingAddress,
-) => {
-  // Fetch cart items
-  const cartItems = await fetchCartItems(userId);
-
-  if (!cartItems.length) {
-    throw new Error("Cart is empty.");
-  }
-
-  // Create order
-  const order = await Order.create({
-    userId: new mongoose.Types.ObjectId(userId),
-    paymentId: new mongoose.Types.ObjectId(paymentId),
-    totalPrice: totalAmount,
-    shippingAddress,
-    orderedAt: new Date(),
-  });
-
-  // Create order items
-  const orderItems = cartItems.map((cartItem) => ({
-    orderId: order._id,
-    productId: cartItem.productId,
-    productSnapshot: cartItem.productSnapshot,
-    quantity: cartItem.quantity,
-    pricePerUnit: cartItem.productSnapshot.price,
-    totalPrice: cartItem.totalPrice,
-  }));
-
-  // First store order items in the db and then clear user reservations (payment successful)
-  await OrderItem.insertMany(orderItems);
-  await Reservation.deleteMany({ userId });
-
-  // Update product sales count
-  await updateProductSales(orderItems);
-
-  // Update user's cart status to CONVERTED
-  await clearCartItems(userId);
-  await Cart.findOneAndUpdate(
-    { userId },
-    { status: "CONVERTED", updatedAt: new Date() },
-  );
-
-  return order;
-};
-
 const updateOrderShippingStatus = async (orderId, trackingData) => {
   const updateFields = {
     trackActivities: trackingData.track_activities || [],
@@ -197,8 +266,9 @@ const updateOrderShippingStatus = async (orderId, trackingData) => {
 };
 
 export {
+  createOrderAfterPayment,
+  fetchAllOrders,
   fetchAllUserOrders,
   fetchUserOrderById,
-  createOrderAfterPayment,
   updateOrderShippingStatus,
 };

@@ -2,12 +2,17 @@ import { Router } from "express";
 import { handleRole } from "../middlewares/roleHandler.js";
 import { handleValidateToken } from "../middlewares/validateTokenHandler.js";
 import {
+  fetchAllOrdersController,
   fetchAllUserOrdersController,
   fetchUserOrderByIdController,
   trackOrderController,
 } from "../controllers/orderControllers.js";
 
 const router = Router();
+
+router
+  .route("/all")
+  .get(handleValidateToken, handleRole("ADMIN"), fetchAllOrdersController);
 
 router
   .route("")

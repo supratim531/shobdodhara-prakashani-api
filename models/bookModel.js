@@ -1,10 +1,5 @@
 import mongoose from "mongoose";
 
-const toCapitalizeCase = (value) => {
-  if (!value) return value;
-  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-};
-
 const bookSchema = new mongoose.Schema(
   {
     productId: {
@@ -66,7 +61,7 @@ const bookSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      set: toCapitalizeCase,
+      lowercase: true,
     },
   },
   {

@@ -4,7 +4,9 @@ import expressAsyncHandler from "express-async-handler";
 import {
   trackShipment,
   getShipmentStatus,
+  generateLabel,
 } from "../services/shiprocketServices.js";
+import { validateGenerateOrderLabelPayload } from "../validators/orderValidators.js";
 import {
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
@@ -154,9 +156,45 @@ const trackOrderController = expressAsyncHandler(async (req, res) => {
   }
 });
 
+/**
+ * @description Generate label for single/multiple orders
+ * @route POST /api/v1/order/generate/label
+ * @access private (role: ADMIN)
+ */
+const generateOrderLabelController = expressAsyncHandler(async (req, res) => {
+  const { value: data, error } = validateGenerateOrderLabelPayload(req.body);
+
+  if (error) {
+    res.status(UNPROCESSABLE_ENTITY.code);
+    res.statusMessage = UNPROCESSABLE_ENTITY.title;
+    throw error;
+  }
+
+  try {
+    const result = await generateLabel(...data.shiprocketShipmentIds);
+
+    return successResponse(
+      res,
+      "Fetched generated label for selected order(s).",
+      result,
+    );
+  } catch (error) {
+    if (error.message?.includes("Could not generate label")) {
+      res.status(NOT_FOUND.code);
+      res.statusMessage = NOT_FOUND.title;
+    } else {
+      res.status(BAD_REQUEST.code);
+      res.statusMessage = BAD_REQUEST.title;
+    }
+
+    throw error;
+  }
+});
+
 export {
   fetchAllOrdersController,
   fetchAllUserOrdersController,
   fetchUserOrderByIdController,
   trackOrderController,
+  generateOrderLabelController,
 };

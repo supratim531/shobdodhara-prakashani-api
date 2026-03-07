@@ -6,6 +6,7 @@ import {
   fetchAllUserOrdersController,
   fetchUserOrderByIdController,
   trackOrderController,
+  generateOrderLabelController,
 } from "../controllers/orderControllers.js";
 
 const router = Router();
@@ -25,5 +26,9 @@ router
 router
   .route("/:orderId/track")
   .get(handleValidateToken, handleRole("USER"), trackOrderController);
+
+router
+  .route("/generate/label")
+  .post(handleValidateToken, handleRole("ADMIN"), generateOrderLabelController);
 
 export default router;

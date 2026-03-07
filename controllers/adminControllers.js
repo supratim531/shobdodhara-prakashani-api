@@ -12,7 +12,7 @@ import {
 
 /**
  * @description Login for admin only
- * @route POST /api/v1/admin/login
+ * @route POST /api/v1/auth/admin/login
  * @access public
  */
 const loginController = expressAsyncHandler(async (req, res) => {
@@ -66,7 +66,7 @@ const loginController = expressAsyncHandler(async (req, res) => {
 
 /**
  * @description Account verification for admin only
- * @route POST /api/v1/admin/verification
+ * @route POST /api/v1/auth/admin/verification
  * @access private (role: ADMIN)
  */
 const verificationController = expressAsyncHandler(async (req, res) => {

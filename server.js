@@ -80,7 +80,7 @@ app.use(express.json());
 app.use(requestBodyLogger);
 app.use("/public", express.static("public"));
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/auth/admin", adminRouter);
 app.use("/api/v1/upload", uploadRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/profile", profileRouter);

@@ -8,9 +8,9 @@ import {
 
 const router = Router();
 
-router.route("/auth/login").post(loginController);
+router.route("/login").post(loginController);
 router
-  .route("/auth/verification")
+  .route("/verification")
   .post(handleValidateToken, handleRole("ADMIN"), verificationController);
 
 export default router;

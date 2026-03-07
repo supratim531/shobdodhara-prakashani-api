@@ -38,8 +38,6 @@ const bookSchema = new mongoose.Schema(
     isbn: {
       type: String,
       trim: true,
-      unique: true,
-      index: true,
     },
 
     genre: {
@@ -76,6 +74,13 @@ const bookSchema = new mongoose.Schema(
   },
 );
 
+bookSchema.index(
+  { isbn: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { isbn: { $exists: true, $gt: "" } },
+  },
+);
 bookSchema.index(
   { author: "text", publisher: "text", genre: "text" },
   {

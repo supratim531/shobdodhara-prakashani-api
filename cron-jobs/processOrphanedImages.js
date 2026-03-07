@@ -13,9 +13,7 @@ const processOrphanedImages = async () => {
     const imageDirectories = ["book", "clothes"];
 
     // Get all active image URLs from products
-    const products = await Product.find({ isActive: true }).select(
-      "bannerImage slideImages"
-    );
+    const products = await Product.find().select("bannerImage slideImages");
 
     products.forEach((product) => {
       if (product.bannerImage) {
@@ -36,7 +34,7 @@ const processOrphanedImages = async () => {
         "..",
         "public",
         "images",
-        category
+        category,
       );
 
       if (!fs.existsSync(directoryPath)) continue;

@@ -8,6 +8,8 @@ import {
   SEND_OTP_JOB,
   SEND_CART_REMINDER_JOB,
   SEND_ORDER_CONFIRMATION_JOB,
+  SEND_ENQUIRY_JOB,
+  SEND_JOIN_REQUEST_JOB,
 } from "../constants/jobs.js";
 
 const environment = process.env.NODE_ENV || "development";
@@ -30,6 +32,16 @@ const emailJobHandlers = {
   },
 
   [SEND_ORDER_CONFIRMATION_JOB]: async (job) => {
+    const res = await sendMail(job.data);
+    return res;
+  },
+
+  [SEND_ENQUIRY_JOB]: async (job) => {
+    const res = await sendMail(job.data);
+    return res;
+  },
+
+  [SEND_JOIN_REQUEST_JOB]: async (job) => {
     const res = await sendMail(job.data);
     return res;
   },

@@ -2,7 +2,11 @@ import dotenv from "dotenv";
 import Order from "../models/orderModel.js";
 import emailQueue from "../queues/emailQueue.js";
 import { generateLabel } from "./shiprocketServices.js";
-import { SEND_ORDER_CONFIRMATION_JOB } from "../constants/jobs.js";
+import {
+  SEND_ORDER_CONFIRMATION_JOB,
+  SEND_ENQUIRY_JOB,
+  SEND_JOIN_REQUEST_JOB,
+} from "../constants/jobs.js";
 
 const environment = process.env.NODE_ENV || "development";
 const ENV_PATH =
@@ -152,4 +156,88 @@ const sendOrderConfirmationEmail = async (orderId) => {
   await emailQueue.add(SEND_ORDER_CONFIRMATION_JOB, mail);
 };
 
-export { sendOrderConfirmationEmail };
+const sendEnquiryEmail = async (name, phone, email, enquiry) => {
+  const mail = {
+    email: process.env.PRIMARY_ADMIN_EMAIL,
+    subject: `New Enquiry From ${name}`,
+    body: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+        <div style="background-color: #2196F3; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+          <h1 style="margin: 0;">📧 New Contact Enquiry</h1>
+        </div>
+        
+        <div style="background-color: white; padding: 20px; border-radius: 0 0 5px 5px;">
+          <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+            <h2 style="margin: 0 0 10px 0; color: #333;">Contact Details</h2>
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
+            <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
+          </div>
+
+          <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+            <h2 style="margin: 0 0 10px 0; color: #333;">Enquiry</h2>
+            <p style="margin: 5px 0; white-space: pre-wrap;">${enquiry}</p>
+          </div>
+
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p style="color: #666; font-size: 14px;">This is an automated notification from Shobdodhara Prakashani</p>
+          </div>
+        </div>
+      </div>
+    `,
+  };
+
+  await emailQueue.add(SEND_ENQUIRY_JOB, mail);
+};
+
+const sendJoinRequestEmail = async (name, phone, email, files) => {
+  const attachments = files.map((file) => ({
+    filename: file.originalname,
+    content: file.buffer,
+    contentType: file.mimetype,
+  }));
+
+  const mail = {
+    email: process.env.PRIMARY_ADMIN_EMAIL,
+    subject: `New Author Application From ${name}`,
+    body: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+        <div style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+          <h1 style="margin: 0;">✍️ New Author Application</h1>
+        </div>
+        
+        <div style="background-color: white; padding: 20px; border-radius: 0 0 5px 5px;">
+          <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+            <h2 style="margin: 0 0 10px 0; color: #333;">Applicant Details</h2>
+            <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
+            <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
+          </div>
+
+          ${
+            files.length > 0
+              ? `
+          <div style="margin-bottom: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 5px; border-left: 4px solid #2196F3;">
+            <h2 style="margin: 0 0 10px 0; color: #333;">Attached Documents</h2>
+            <p style="margin: 5px 0;"><strong>Total Files:</strong> ${files.length}</p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              ${files.map((file) => `<li>${file.originalname} (${(file.size / 1024).toFixed(2)} KB)</li>`).join("")}
+            </ul>
+          </div>
+          `
+              : ""
+          }
+
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p style="color: #666; font-size: 14px;">This is an automated notification from Shobdodhara Prakashani</p>
+          </div>
+        </div>
+      </div>
+    `,
+    attachments,
+  };
+
+  await emailQueue.add(SEND_JOIN_REQUEST_JOB, mail);
+};
+
+export { sendOrderConfirmationEmail, sendEnquiryEmail, sendJoinRequestEmail };

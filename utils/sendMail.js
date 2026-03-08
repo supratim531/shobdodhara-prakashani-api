@@ -22,12 +22,16 @@ const transporter = nodemailer.createTransport({ ...configuration });
 
 console.log("sendMail.js: transporter ->", environment, configuration);
 
-const sendMail = async ({ email, subject, body }) => {
+const sendMail = async ({ email, subject, body, attachments = [] }) => {
   const mail = {
     to: email,
     subject,
     html: body,
   };
+
+  if (attachments && attachments.length > 0) {
+    mail.attachments = attachments;
+  }
 
   try {
     const response = await transporter.sendMail(mail);

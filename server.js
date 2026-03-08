@@ -14,6 +14,7 @@ import checkoutRouter from "./routes/checkoutRoutes.js";
 import paymentRouter from "./routes/paymentRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import shiprocketRouter from "./routes/shiprocketRoutes.js";
+import emailRouter from "./routes/emailRoutes.js";
 import createAdmin from "./utils/createAdmin.js";
 import { connectDatabase } from "./config/dbConfig.js";
 import { timers, cronScheduler } from "./utils/cronSchedular.js";
@@ -91,6 +92,7 @@ app.use("/api/v1/checkout", checkoutRouter);
 app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/shipping", shiprocketRouter);
+app.use("/api/v1/email", emailRouter);
 app.use(handleGlobalError);
 
 // Log server initialization

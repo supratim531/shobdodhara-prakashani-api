@@ -63,6 +63,13 @@ const bookSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+
+    searchKeywords: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -70,20 +77,27 @@ const bookSchema = new mongoose.Schema(
 );
 
 bookSchema.index(
+  { searchKeywords: "text" },
+  {
+    default_language: "none",
+    language_override: "others", // Prevent Mongo from using `language` field
+  },
+);
+bookSchema.index(
   { isbn: 1 },
   {
     unique: true,
     partialFilterExpression: { isbn: { $exists: true, $gt: "" } },
   },
 );
-bookSchema.index(
-  { author: "text", publisher: "text", genre: "text" },
-  {
-    weights: { author: 5, publisher: 3, genre: 1 },
-    default_language: "none",
-    language_override: "others", // Prevent Mongo from using `language` field
-  },
-);
+// bookSchema.index(
+//   { author: "text", publisher: "text", genre: "text" },
+//   {
+//     weights: { author: 5, publisher: 3, genre: 1 },
+//     default_language: "none",
+//     language_override: "others", // Prevent Mongo from using `language` field
+//   },
+// );
 
 bookSchema.set("toJSON", { versionKey: false });
 

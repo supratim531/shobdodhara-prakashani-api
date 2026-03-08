@@ -1,8 +1,21 @@
-export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
+export function buildProductAggregationPipeline({
+  query,
+  filter,
+  sort,
+  skip,
+  limit,
+}) {
   const pipeline = [];
   const dataPipeline = [];
 
   pipeline.push(
+    // Apply query search on searchKeywords
+    {
+      $match: {
+        $text: { $search: query },
+      },
+    },
+
     {
       $lookup: {
         from: "products",
@@ -16,12 +29,12 @@ export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
     { $unwind: "$product" },
 
     // Apply filters on joined data
-    { $match: filter }
+    { $match: filter },
   );
 
   if (sort && Object.keys(sort).length) {
-    // $sort: { ...sort, score: { $meta: "textScore" } }
     dataPipeline.push({ $sort: sort });
+    // dataPipeline.push({ $sort: { ...sort, score: { $meta: "textScore" } } });
   }
 
   if ((skip || limit) && !sort) {
@@ -60,6 +73,7 @@ export function buildProductAggregationPipeline({ filter, sort, skip, limit }) {
   // Normalize totalItems
   pipeline.push({
     $addFields: {
+      // score: { $meta: "textScore" },
       totalItems: {
         $ifNull: [{ $arrayElemAt: ["$totalCount.count", 0] }, 0],
       },

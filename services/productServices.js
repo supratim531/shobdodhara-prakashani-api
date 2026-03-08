@@ -101,6 +101,7 @@ const fetchAllProducts = async (query) => {
 
     const [result] = await Book.aggregate(
       buildProductAggregationPipeline({
+        query: query.query,
         filter: bookFilter,
         sort,
         skip,
@@ -120,6 +121,7 @@ const fetchAllProducts = async (query) => {
 
     const [result] = await Clothes.aggregate(
       buildProductAggregationPipeline({
+        query: query.query,
         filter: clothesFilter,
         sort,
         skip,

@@ -3,7 +3,9 @@ function prefixProduct(object) {
   const result = {};
 
   for (const key in object) {
-    result[`product.${key}`] = object[key];
+    if (key !== "$text") {
+      result[`product.${key}`] = object[key];
+    }
   }
 
   return result;
@@ -80,11 +82,19 @@ export function buildBookFilter(query) {
     if (!Number.isNaN(maxPages)) filter.pages.$lte = maxPages;
   }
 
-  // text search (search for the applied index on author, publisher and genre)
+  // custom text search (combined search on title, sku, author, publisher and genre)
   if (query.query) {
-    filter.$text = { $search: query.query };
-    // filter.score = { $meta: "textScore" }
+    // const words = query.query.split(" ");
+    // filter.$or = words.map((word) => ({
+    //   searchKeyword: { $regex: word, $options: "i" },
+    // }));
+    // filter.searchKeywords = { $regex: query.query.trim(), $options: "i" };
   }
+  // // text search (search for the applied index on author, publisher and genre)
+  // if (query.query) {
+  //   filter.$text = { $search: query.query };
+  //   // filter.score = { $meta: "textScore" }
+  // }
 
   // final combined filter: book + product filters with "product." prefixed keys
   const finalFilter = {
@@ -126,11 +136,11 @@ export function buildClothesFilter(query) {
     filter.material = { $regex: query.material.trim(), $options: "i" };
   }
 
-  // text search (search for the applied index on clothingType, brand, and color)
-  if (query.query) {
-    filter.$text = { $search: query.query };
-    // filter.score = { $meta: "textScore" }
-  }
+  // // text search (search for the applied index on clothingType, brand, and color)
+  // if (query.query) {
+  //   filter.$text = { $search: query.query };
+  //   // filter.score = { $meta: "textScore" }
+  // }
 
   // final combined filter: clothes + product filters with "product." prefixed keys
   const finalFilter = {

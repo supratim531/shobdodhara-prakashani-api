@@ -20,9 +20,21 @@ const saveProduct = async (productData, categoryData) => {
 
   try {
     if (productData.category === "BOOK") {
+      const searchKeywords = [
+        productData.title,
+        productData.sku,
+        categoryData.author,
+        categoryData.publisher,
+        categoryData.genre,
+        categoryData.language,
+      ]
+        .join(" ")
+        .toLowerCase();
+
       book = new Book({
         productId: product._id,
         ...categoryData,
+        searchKeywords,
       });
       book = await book.save();
     } else if (productData.category === "CLOTHES") {
@@ -189,9 +201,21 @@ const updateProduct = async (
   let book, clothes;
 
   if (bookId && Object.keys(categoryData).length > 0) {
+    const existingBook = await Book.findById(bookId);
+    const searchKeywords = [
+      productData.title || updatedProduct.title,
+      productData.sku || updatedProduct.sku,
+      categoryData.author || existingBook.author,
+      categoryData.publisher || existingBook.publisher,
+      categoryData.genre || existingBook.genre,
+      categoryData.language || existingBook.language,
+    ]
+      .join(" ")
+      .toLowerCase();
+
     book = await Book.findByIdAndUpdate(
       bookId,
-      { $set: categoryData },
+      { $set: { ...categoryData, searchKeywords } },
       { new: true },
     );
   }

@@ -8,14 +8,16 @@ export function buildProductAggregationPipeline({
   const pipeline = [];
   const dataPipeline = [];
 
-  pipeline.push(
-    // Apply query search on searchKeywords
-    {
+  // Apply query search on searchKeywords
+  if (query) {
+    pipeline.push({
       $match: {
         $text: { $search: query },
       },
-    },
+    });
+  }
 
+  pipeline.push(
     {
       $lookup: {
         from: "products",

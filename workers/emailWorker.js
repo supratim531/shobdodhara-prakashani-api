@@ -3,7 +3,6 @@ import { Worker } from "bullmq";
 import sendMail from "../utils/sendMail.js";
 import { EMAIL_QUEUE } from "../constants/queues.js";
 import { redisClient } from "../config/redisConfig.js";
-import { connectDatabase } from "../config/dbConfig.js";
 import {
   SEND_OTP_JOB,
   SEND_CART_REMINDER_JOB,
@@ -17,8 +16,6 @@ const ENV_PATH =
   environment === "production" ? "./.env.production" : "./.env.development";
 
 dotenv.config({ path: ENV_PATH, quiet: true });
-
-connectDatabase();
 
 const emailJobHandlers = {
   [SEND_OTP_JOB]: async (job) => {
@@ -42,7 +39,16 @@ const emailJobHandlers = {
   },
 
   [SEND_JOIN_REQUEST_JOB]: async (job) => {
-    const res = await sendMail(job.data);
+    const jobData = { ...job.data };
+
+    if (jobData.attachments && jobData.attachments.length > 0) {
+      jobData.attachments = jobData.attachments.map((attachment) => ({
+        ...attachment,
+        content: Buffer.from(attachment.content.data),
+      }));
+    }
+
+    const res = await sendMail(jobData);
     return res;
   },
 };

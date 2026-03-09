@@ -15,6 +15,11 @@ function prefixProduct(object) {
 export function buildProductFilter(query) {
   const filter = {};
 
+  if (query.active) {
+    if (query.active === "true") filter.isActive = true;
+    if (query.active === "false") filter.isActive = false;
+  }
+
   // filter for price range = { ..., price: { $gte: 500, $lte: 1000 } }
   if (query.minPrice || query.maxPrice) {
     filter.price = {};
@@ -82,14 +87,13 @@ export function buildBookFilter(query) {
     if (!Number.isNaN(maxPages)) filter.pages.$lte = maxPages;
   }
 
-  // custom text search (combined search on title, sku, author, publisher and genre)
-  if (query.query) {
-    // const words = query.query.split(" ");
-    // filter.$or = words.map((word) => ({
-    //   searchKeyword: { $regex: word, $options: "i" },
-    // }));
-    // filter.searchKeywords = { $regex: query.query.trim(), $options: "i" };
-  }
+  // // custom text search (combined search on title, sku, author, publisher and genre)
+  // if (query.query) {
+  //   const words = query.query.split(" ");
+  //   filter.$or = words.map((word) => ({
+  //     searchKeyword: { $regex: word, $options: "i" },
+  //   }));
+  // }
   // // text search (search for the applied index on author, publisher and genre)
   // if (query.query) {
   //   filter.$text = { $search: query.query };

@@ -103,19 +103,21 @@ const processInactiveCarts = async () => {
                 <h1 style="color: #2c3e50; text-align: center; margin-bottom: 10px;">Don't let them go! 😊</h1>
                 <p style="text-align: center; color: #7f8c8d; font-size: 16px; margin-bottom: 30px;">You left ${cartItems.length} item${cartItems.length > 1 ? "s" : ""} in your cart</p>
                 
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                  <thead>
-                    <tr style="background-color: #f8f9fa;">
-                      <th style="padding: 12px; text-align: left; color: #555; font-size: 14px;">Image</th>
-                      <th style="padding: 12px; text-align: left; color: #555; font-size: 14px;">Product</th>
-                      <th style="padding: 12px; text-align: center; color: #555; font-size: 14px;">Qty</th>
-                      <th style="padding: 12px; text-align: right; color: #555; font-size: 14px;">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${productRows}
-                  </tbody>
-                </table>
+                <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                  <table style="width: 100%; min-width: 500px; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                      <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; color: #555; font-size: 14px;">Image</th>
+                        <th style="padding: 12px; text-align: left; color: #555; font-size: 14px;">Product</th>
+                        <th style="padding: 12px; text-align: center; color: #555; font-size: 14px;">Qty</th>
+                        <th style="padding: 12px; text-align: right; color: #555; font-size: 14px;">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${productRows}
+                    </tbody>
+                  </table>
+                </div>
                 
                 <div style="text-align: right; padding: 15px 0; border-top: 2px solid #e67e22;">
                   <span style="font-size: 18px; color: #555;">Total: </span>

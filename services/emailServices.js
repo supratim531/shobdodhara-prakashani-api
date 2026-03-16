@@ -79,9 +79,9 @@ const sendOrderConfirmationEmail = async (orderId) => {
         <div style="background-color: white; padding: 20px; border-radius: 0 0 5px 5px;">
           <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
             <h2 style="margin: 0 0 10px 0; color: #333;">Order Details</h2>
-            <p style="margin: 5px 0;"><strong>Order ID:</strong> #${order._id}</p>
-            <p style="margin: 5px 0;"><strong>Shiprocket Order ID:</strong> #${order.shiprocketOrderId}</p>
-            <p style="margin: 5px 0;"><strong>Shiprocket Shipment ID:</strong> #${order.shiprocketShipmentId}</p>
+            <p style="margin: 5px 0;"><strong># Order ID:</strong> ${order._id}</p>
+            <p style="margin: 5px 0;"><strong># Shiprocket Order ID:</strong> ${order.shiprocketOrderId}</p>
+            <p style="margin: 5px 0;"><strong># Shiprocket Shipment ID:</strong> ${order.shiprocketShipmentId}</p>
             <p style="margin: 5px 0;"><strong>Order Date:</strong> ${new Date(order.orderedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
             <p style="margin: 5px 0;"><strong>Payment Status:</strong> <span style="color: #4CAF50; font-weight: bold;">PAID</span></p>
           </div>

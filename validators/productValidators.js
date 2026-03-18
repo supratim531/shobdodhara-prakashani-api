@@ -15,7 +15,7 @@ export const validateSaveProductPayload = (payload) => {
     bannerImage: Joi.string().required().label("bannerImage"),
     slideImages: Joi.array()
       .items(Joi.string())
-      .min(1)
+      .min(0)
       .required()
       .label("slideImages"),
     length: Joi.number().min(0.6).required().label("length"),
@@ -67,7 +67,7 @@ export const validateUpdateProductPayload = (payload) => {
     discountPrice: Joi.number().min(0).label("discountPrice"),
     stock: Joi.number().min(0).label("stock"),
     bannerImage: Joi.string().label("bannerImage"),
-    slideImages: Joi.array().items(Joi.string()).min(1).label("slideImages"),
+    slideImages: Joi.array().items(Joi.string()).min(0).label("slideImages"),
     length: Joi.number().min(0.6).label("length"),
     breadth: Joi.number().min(0.6).label("breadth"),
     height: Joi.number().min(0.6).label("height"),

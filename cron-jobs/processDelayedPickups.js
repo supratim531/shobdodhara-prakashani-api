@@ -4,13 +4,15 @@ import { schedulePickup } from "../services/shiprocketServices.js";
 
 const processDelayedPickups = async () => {
   try {
-    const sixMinutesAgo = new Date(Date.now() - 0.1 * 60 * 60 * 1000);
+    // const sixMinutesAgo = new Date(Date.now() - 0.1 * 60 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
     // const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const ordersToSchedule = await Order.find({
       pickupScheduled: false,
       awbCode: { $exists: true, $ne: null },
       shiprocketShipmentId: { $exists: true, $ne: null },
-      orderedAt: { $lte: sixMinutesAgo },
+      // orderedAt: { $lte: sixMinutesAgo },
+      orderedAt: { $lte: fortyEightHoursAgo },
       // orderedAt: { $lte: twentyFourHoursAgo },
     });
 

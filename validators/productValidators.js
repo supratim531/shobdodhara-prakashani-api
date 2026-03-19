@@ -24,6 +24,7 @@ export const validateSaveProductPayload = (payload) => {
     height: Joi.number().min(0.6).required().label("height"),
     weight: Joi.number().min(0.1).required().label("weight"),
     publishedAt: Joi.date().iso().required().label("publishedAt"), // published date format (YYYY-MM-DD)
+    showYearOnly: Joi.boolean().label("showYearOnly"),
   });
 
   return saveProductSchema.validate(payload, { abortEarly: false });
@@ -75,6 +76,7 @@ export const validateUpdateProductPayload = (payload) => {
     height: Joi.number().min(0.6).label("height"),
     weight: Joi.number().min(0.1).label("weight"),
     publishedAt: Joi.date().iso().label("publishedAt"), // published date (YYYY-MM-DD)
+    showYearOnly: Joi.boolean().label("showYearOnly"),
     isActive: Joi.boolean().label("isActive"),
   });
 

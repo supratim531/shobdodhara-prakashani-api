@@ -97,6 +97,11 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
+    showYearOnly: {
+      type: Boolean,
+      default: false,
+    },
+
     isActive: {
       type: Boolean,
       required: true,

@@ -12,6 +12,7 @@ export const validateSaveProductPayload = (payload) => {
     price: Joi.number().positive().required().label("price"),
     discountPrice: Joi.number().positive().label("discountPrice"),
     stock: Joi.number().min(0).required().label("stock"),
+    totalSales: Joi.number().min(0).optional().label("totalSales"),
     bannerImage: Joi.string().required().label("bannerImage"),
     slideImages: Joi.array()
       .items(Joi.string())
@@ -66,6 +67,7 @@ export const validateUpdateProductPayload = (payload) => {
     price: Joi.number().positive().label("price"),
     discountPrice: Joi.number().min(0).label("discountPrice"),
     stock: Joi.number().min(0).label("stock"),
+    totalSales: Joi.number().min(0).label("totalSales"),
     bannerImage: Joi.string().label("bannerImage"),
     slideImages: Joi.array().items(Joi.string()).min(0).label("slideImages"),
     length: Joi.number().min(0.6).label("length"),
